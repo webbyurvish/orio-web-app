@@ -522,17 +522,14 @@ export default function DashboardPage() {
       .catch(() => {});
   };
 
-  /** Build parakeetai:// URL and navigate so the registered desktop app opens with this session (and token). */
+  /** Build orioai:// URL and navigate so the installed desktop app opens with this session (and token). */
   const launchDesktopApp = (sessionId: string, resumeId?: string | null) => {
-    // Use explicit API URL for the desktop app so it hits the real API (e.g. 5050), not the frontend origin (5173).
-    const apiBase = (
-      import.meta.env.VITE_API_URL ||
-      import.meta.env.VITE_API_PUBLIC_URL ||
-      "http://localhost:5050/api"
-    ).replace(/\/?$/, "/");
+    // Desktop app needs an absolute URL. In production we serve the dashboard on the VM and proxy /api to the API container.
+    // So we pass the dashboard origin + "/api/" (works on both localhost dev and VM prod).
+    const apiBase = `${window.location.origin.replace(/\/$/, "")}/api/`;
     const params = new URLSearchParams({ sessionId, apiBaseUrl: apiBase });
     if (resumeId) params.set("resumeId", resumeId);
-    const url = `parakeetai://start?${params.toString()}`;
+    const url = `orioai://start?${params.toString()}`;
     window.location.href = url;
   };
 

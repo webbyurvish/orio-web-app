@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 
-const DESKTOP_PROTOCOL_URL = 'parakeetai://start'
+const DESKTOP_PROTOCOL_URL = 'orioai://start'
 
 export default function AuthDesktopCompletePage() {
   const navigate = useNavigate()

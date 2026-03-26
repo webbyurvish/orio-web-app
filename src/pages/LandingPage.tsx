@@ -618,7 +618,7 @@ export default function LandingPage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <a
-                href="https://github.com/webbyurvish/orio-desktop-app/releases/latest/download/orio-desktop-app-win-x64.zip"
+                href="https://github.com/webbyurvish/orio-desktop-app/releases/latest/download/orio-desktop-setup.exe"
                 className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-700"
               >
                 Download Desktop App

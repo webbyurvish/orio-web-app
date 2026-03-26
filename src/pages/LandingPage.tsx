@@ -50,6 +50,8 @@ export default function LandingPage() {
   const stats = data.stats
   const HappyEngineers = stats?.HappyEngineers ?? '1000+'
 
+  console.log('data', data);
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Promo: dark purple strip + orange banner with offer and UPI button */}

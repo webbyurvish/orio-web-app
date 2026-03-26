@@ -608,6 +608,46 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Desktop App */}
+      <section id="desktop" className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Desktop App</h2>
+            <p className="mt-3 text-gray-600">
+              Download the Windows desktop app to run live interview sessions with Orio AI.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a
+                href="https://github.com/webbyurvish/orio-desktop-app/releases/latest/download/orio-desktop-app-win-x64.zip"
+                className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-700"
+              >
+                Download Desktop App
+                <span className="text-white/80 text-sm">(Windows)</span>
+              </a>
+              <a
+                href="https://github.com/webbyurvish/orio-desktop-app/releases/latest"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold border border-gray-300 text-gray-700 hover:bg-white"
+              >
+                View release notes
+              </a>
+            </div>
+            <p className="mt-3 text-xs text-gray-500">
+              If Windows shows a SmartScreen warning, click “More info” → “Run anyway”.
+            </p>
+          </div>
+          <div className="rounded-2xl bg-white border border-gray-200 p-6">
+            <h3 className="font-semibold text-gray-900">After installing</h3>
+            <ul className="mt-3 space-y-2 text-sm text-gray-700">
+              <li>• Open the desktop app once</li>
+              <li>• Use the dashboard to start a session</li>
+              <li>• The web app can launch the desktop app via protocol link</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-primary-900 text-primary-100">
         <div className="max-w-6xl mx-auto px-4 py-12">

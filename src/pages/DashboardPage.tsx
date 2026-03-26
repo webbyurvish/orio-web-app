@@ -478,7 +478,12 @@ export default function DashboardPage() {
 
           <div className="my-2 border-t border-gray-100" />
 
-          <button type="button" className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
+          <a
+            href="https://github.com/webbyurvish/orio-desktop-app/releases/latest/download/orio-desktop-app-win-x64.zip"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+          >
             <span className="shrink-0"><IconDownload /></span>
             {sidebarOpen && (
               <>
@@ -486,7 +491,7 @@ export default function DashboardPage() {
                 <IconChevronDown />
               </>
             )}
-          </button>
+          </a>
           <a href="mailto:support@parakeet.ai" className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition">
             <span className="shrink-0"><IconEnvelope /></span>
             {sidebarOpen && <span className="text-sm font-medium">Email Support</span>}

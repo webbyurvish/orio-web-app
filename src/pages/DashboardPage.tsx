@@ -1,12 +1,25 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
+import {
+  formatCreditsDisplay,
+  useBillingStore,
+} from "../store/billingStore";
+import { CHECKOUT_PRODUCTS } from "../billing/plans";
+import type { CheckoutProduct } from "../billing/plans";
+import { PaymentCheckoutModal } from "../components/PaymentCheckoutModal";
 import { resumesApi, type ResumeDto } from "../api/resumes";
 import {
   callSessionsApi,
   type CallSessionDto,
   type CallSessionMessageDto,
 } from "../api/callSessions";
+import { verifyStripeCheckoutSession } from "../api/stripePayments";
+import {
+  AZURE_SPEECH_STT_LOCALES,
+  DEFAULT_SPEECH_LOCALE,
+  normalizeSpeechLocale,
+} from "../constants/azureSpeechSttLocales";
 
 function IconHome() {
   return (
@@ -152,20 +165,12 @@ function IconInfo() {
   );
 }
 
-function IconMoreVertical() {
-  return (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
-    </svg>
-  );
-}
-
 export default function DashboardPage() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [activeNav, setActiveNav] = useState("home");
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [resumeModalStep, setResumeModalStep] = useState<
@@ -191,7 +196,7 @@ export default function DashboardPage() {
     company: "",
     jobDescription: "",
     resumeId: "",
-    language: "English",
+    language: DEFAULT_SPEECH_LOCALE,
     simpleLanguage: true,
     extraContext: "Keep answers to the point and with a coding example",
     aiModel: "GPT-4.1 Mini",
@@ -223,6 +228,11 @@ export default function DashboardPage() {
     "credits" | "subscription" | "lifetime"
   >("credits");
   const [createSessionIsPaid, setCreateSessionIsPaid] = useState(false);
+  const [checkoutProduct, setCheckoutProduct] =
+    useState<CheckoutProduct | null>(null);
+  const billingCredits = useBillingStore((s) => s.credits);
+  const billingUnlimited = useBillingStore((s) => s.unlimitedAccess);
+  const billingPlanDisplay = useBillingStore((s) => s.planDisplay);
 
   const displayName =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
@@ -255,6 +265,10 @@ export default function DashboardPage() {
     }
   }, [location.pathname]);
 
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [location.pathname]);
+
   // Sync buyCreditsTab from URL when on buy credits page
   useEffect(() => {
     if (activeNav !== "buy-credits") return;
@@ -271,6 +285,59 @@ export default function DashboardPage() {
       }
     }
   }, [activeNav, searchParams, location.pathname, navigate, setSearchParams]);
+
+  // After Stripe Checkout redirect: verify session once, update billing store, clean URL.
+  useEffect(() => {
+    if (activeNav !== "buy-credits") return;
+    const pay = searchParams.get("payment");
+    const sessionId = searchParams.get("session_id");
+    if (pay !== "success" || !sessionId) return;
+
+    const key = `orio_stripe_ok_${sessionId}`;
+    const stripSuccessParams = () => {
+      const next = new URLSearchParams(searchParams);
+      next.delete("payment");
+      next.delete("session_id");
+      setSearchParams(next, { replace: true });
+    };
+
+    if (typeof sessionStorage !== "undefined" && sessionStorage.getItem(key) === "1") {
+      stripSuccessParams();
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const r = await verifyStripeCheckoutSession(sessionId);
+        if (cancelled) return;
+        if (r.paid && r.productId && CHECKOUT_PRODUCTS[r.productId]) {
+          useBillingStore
+            .getState()
+            .applySuccessfulPurchase(CHECKOUT_PRODUCTS[r.productId]);
+          if (typeof sessionStorage !== "undefined") {
+            sessionStorage.setItem(key, "1");
+          }
+        }
+      } catch {
+        /* ignore */
+      } finally {
+        if (!cancelled) stripSuccessParams();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeNav, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (activeNav !== "buy-credits") return;
+    if (searchParams.get("payment") !== "cancelled") return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("payment");
+    setSearchParams(next, { replace: true });
+  }, [activeNav, searchParams, setSearchParams]);
 
   // When navigated to call-sessions with state to open create session modal, open it and clear state
   useEffect(() => {
@@ -411,7 +478,7 @@ export default function DashboardPage() {
       company: s.title ?? "",
       jobDescription: s.description ?? "",
       resumeId: s.resumeId ?? "",
-      language: s.language || "English",
+      language: normalizeSpeechLocale(s.language) || DEFAULT_SPEECH_LOCALE,
       simpleLanguage: s.simpleLanguage,
       extraContext:
         s.extraContext || "Keep answers to the point and with a coding example",
@@ -435,7 +502,7 @@ export default function DashboardPage() {
       company: "",
       jobDescription: "",
       resumeId: "",
-      language: "English",
+      language: DEFAULT_SPEECH_LOCALE,
       simpleLanguage: true,
       extraContext: "Keep answers to the point and with a coding example",
       aiModel: "GPT-4.1 Mini",
@@ -504,12 +571,18 @@ export default function DashboardPage() {
   };
 
   /** Build orioai:// URL and navigate so the installed desktop app opens with this session (and token). */
-  const launchDesktopApp = (sessionId: string, resumeId?: string | null) => {
+  const launchDesktopApp = (
+    sessionId: string,
+    resumeId?: string | null,
+    language?: string | null,
+  ) => {
     // Desktop app needs an absolute URL. In production we serve the dashboard on the VM and proxy /api to the API container.
     // So we pass the dashboard origin + "/api/" (works on both localhost dev and VM prod).
     const apiBase = `${window.location.origin.replace(/\/$/, "")}/api/`;
     const params = new URLSearchParams({ sessionId, apiBaseUrl: apiBase });
     if (resumeId) params.set("resumeId", resumeId);
+    const lang = (language ?? "").trim();
+    if (lang) params.set("language", lang);
     const url = `orioai://start?${params.toString()}`;
     window.location.href = url;
   };
@@ -568,24 +641,58 @@ export default function DashboardPage() {
     }
   };
 
+  const isSidebarExpanded = true;
+
+  const navigateFromSidebar = (path: string) => {
+    setMobileSidebarOpen(false);
+    navigate(path);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#F9FAFB] flex relative">
+      {mobileSidebarOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          aria-label="Close sidebar"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
       {/* Sidebar - OrioAI style */}
       <aside
-        className={`${sidebarOpen ? "w-64" : "w-20"} sticky top-0 h-screen bg-white border-r border-gray-200 flex flex-col transition-all duration-300 shrink-0`}
+        className={`fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 shrink-0 ${
+          mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:z-auto lg:w-64`}
       >
         {/* Logo */}
-        <div className="p-4 border-b border-gray-100 flex items-center gap-2.5">
-          <span className="w-9 h-9 rounded-lg bg-primary-500 flex items-center justify-center text-white shrink-0">
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C8 2 6 5 6 8c0 2 1 4 2 5l-2 6h12l-2-6c1-1 2-3 2-5 0-3-2-6-6-6zm0 2c2.2 0 4 1.8 4 4 0 1.5-.8 3.2-1.5 4.5L14 18h-4l-.5-5.5C8.8 11.2 8 9.5 8 8c0-2.2 1.8-4 4-4z" />
-            </svg>
-          </span>
-          {sidebarOpen && (
-            <span className="font-semibold text-gray-800 text-base">
-              OrioAI
+        <div className="min-h-14 px-3 sm:px-4 border-b border-gray-200 flex items-center gap-2.5">
+          <Link
+            to="/"
+            onClick={() => {
+              setMobileSidebarOpen(false);
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
+            className="flex items-center gap-2.5 min-w-0"
+          >
+            <span className="w-9 h-9 rounded-lg bg-indigo-500 flex items-center justify-center text-white shrink-0">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8 2 6 5 6 8c0 2 1 4 2 5l-2 6h12l-2-6c1-1 2-3 2-5 0-3-2-6-6-6zm0 2c2.2 0 4 1.8 4 4 0 1.5-.8 3.2-1.5 4.5L14 18h-4l-.5-5.5C8.8 11.2 8 9.5 8 8c0-2.2 1.8-4 4-4z" />
+              </svg>
             </span>
-          )}
+            {isSidebarExpanded && (
+              <span className="font-semibold text-gray-800 text-base">
+                OrioAI
+              </span>
+            )}
+          </Link>
+          <button
+            type="button"
+            className="ml-auto p-2 rounded-lg text-gray-500 hover:bg-gray-100 lg:hidden"
+            onClick={() => setMobileSidebarOpen(false)}
+            aria-label="Close menu"
+          >
+            ✕
+          </button>
         </div>
 
         {/* Main nav */}
@@ -596,16 +703,16 @@ export default function DashboardPage() {
               type="button"
               onClick={() => {
                 if (id === "call-sessions")
-                  navigate("/dashboard/call-sessions");
-                else if (id === "cvs") navigate("/dashboard/cvs");
-                else navigate("/dashboard");
+                  navigateFromSidebar("/dashboard/call-sessions");
+                else if (id === "cvs") navigateFromSidebar("/dashboard/cvs");
+                else navigateFromSidebar("/dashboard");
               }}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition ${activeNav === id ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
+              className={`w-full flex items-center ${isSidebarExpanded ? "gap-3 px-4 justify-start" : "justify-center px-0"} py-2.5 text-left transition ${activeNav === id ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`}
             >
               <span className="shrink-0 text-gray-600">
                 <Icon />
               </span>
-              {sidebarOpen && (
+              {isSidebarExpanded && (
                 <span className="text-sm font-medium">{label}</span>
               )}
             </button>
@@ -617,12 +724,12 @@ export default function DashboardPage() {
             href="https://github.com/webbyurvish/orio-desktop-app/releases/latest/download/orio-desktop-setup.exe"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+            className={`w-full flex items-center ${isSidebarExpanded ? "gap-3 px-4 justify-start" : "justify-center px-0"} py-2.5 text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition`}
           >
             <span className="shrink-0">
               <IconDownload />
             </span>
-            {sidebarOpen && (
+            {isSidebarExpanded && (
               <>
                 <span className="text-sm font-medium flex-1">
                   Download Desktop App
@@ -633,24 +740,24 @@ export default function DashboardPage() {
           </a>
           <a
             href="mailto:support@parakeet.ai"
-            className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+            className={`w-full flex items-center ${isSidebarExpanded ? "gap-3 px-4 justify-start" : "justify-center px-0"} py-2.5 text-left text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition`}
           >
             <span className="shrink-0">
               <IconEnvelope />
             </span>
-            {sidebarOpen && (
+            {isSidebarExpanded && (
               <span className="text-sm font-medium">Email Support</span>
             )}
           </a>
         </nav>
 
         {/* Credits card + user */}
-        {sidebarOpen && (
+        {isSidebarExpanded && (
           <div className="p-4 border-t border-gray-100 space-y-4">
-            <div className="rounded-xl bg-gray-50 border border-gray-100 p-4">
+            <div className="rounded-2xl bg-white border border-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-4">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-primary-500">
+                  <span className="text-indigo-500">
                     <svg
                       className="w-5 h-5"
                       fill="currentColor"
@@ -670,25 +777,34 @@ export default function DashboardPage() {
                     <IconInfo />
                   </button>
                 </div>
-                <button
-                  type="button"
-                  className="p-1 text-gray-400 hover:text-gray-600"
-                  aria-label="More"
-                >
-                  <IconMoreVertical />
-                </button>
               </div>
               <p className="text-sm text-gray-600">
-                You have{" "}
-                <span className="inline-block px-2 py-0.5 rounded-md bg-primary-100 text-primary-700 font-semibold">
-                  2.5
-                </span>{" "}
-                credits.
+                {billingUnlimited ? (
+                  <>
+                    <span className="inline-block px-2 py-0.5 rounded-md bg-violet-100 text-violet-800 font-semibold">
+                      Unlimited calls
+                    </span>
+                    {billingPlanDisplay ? (
+                      <span className="block mt-1 text-xs text-gray-500">
+                        Plan: {billingPlanDisplay}
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    You have{" "}
+                    <span className="inline-block px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 font-semibold">
+                      {formatCreditsDisplay(billingCredits)}
+                    </span>{" "}
+                    credits.
+                  </>
+                )}
               </p>
               <button
                 type="button"
                 onClick={() => navigate("/dashboard/buyCredits?tab=credits")}
-                className="mt-3 w-full py-2.5 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800"
+                className="mt-3 w-full py-2.5 rounded-xl text-white text-sm font-medium shadow-md transition-all duration-200 hover:scale-[1.02]"
+                style={{ backgroundImage: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}
               >
                 Buy Credits
               </button>
@@ -709,11 +825,11 @@ export default function DashboardPage() {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header - OrioAI Home style */}
-        <header className="bg-white border-b border-gray-200 h-14 flex items-center justify-between px-6 shrink-0">
-          <div className="flex items-center gap-4">
+        <header className="bg-white border-b border-gray-200 min-h-14 flex items-center justify-between px-3 sm:px-4 md:px-6 py-2 gap-2 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <button
               type="button"
-              onClick={() => setSidebarOpen((o) => !o)}
+              onClick={() => setMobileSidebarOpen(true)}
               className="p-2 rounded-lg hover:bg-gray-100 lg:hidden"
             >
               <svg
@@ -752,17 +868,21 @@ export default function DashboardPage() {
                 Back
               </button>
             ) : (
-              <h1 className="text-lg font-semibold text-gray-800">
+              <h1 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
                 {mainNavItems.find((i) => i.id === activeNav)?.label ??
-                  (activeNav === "profile" ? "Profile" : "Home")}
+                  (activeNav === "profile"
+                    ? "Profile"
+                    : activeNav === "buy-credits"
+                      ? "Plans & billing"
+                      : "Home")}
               </h1>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
             {previewResumeId ? (
               <>
                 <span className="text-sm text-gray-600 inline-flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-white text-[10px]">
+                  <span className="w-4 h-4 rounded-full bg-violet-500 flex items-center justify-center text-white text-[10px]">
                     ✓
                   </span>
                   Auto Saved
@@ -816,7 +936,7 @@ export default function DashboardPage() {
                       state: { openCreateSessionModal: "free" },
                     })
                   }
-                  className="px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50"
+                  className="hidden sm:inline-flex px-3 md:px-4 py-2 bg-white border border-gray-300 text-gray-700 text-xs sm:text-sm font-medium rounded-lg hover:bg-gray-50"
                 >
                   Start Free Session
                 </button>
@@ -827,7 +947,7 @@ export default function DashboardPage() {
                       state: { openCreateSessionModal: "free" },
                     })
                   }
-                  className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 shadow-sm"
+                  className="px-3 md:px-4 py-2 bg-gray-900 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-gray-800 shadow-sm"
                 >
                   Start Session
                 </button>
@@ -843,7 +963,7 @@ export default function DashboardPage() {
             <div className="flex-1 flex flex-col min-h-0 bg-gray-100">
               {/* Single tab: Original PDF */}
               <div className="flex items-center border-b border-gray-300 bg-gray-200 shrink-0">
-                <span className="px-4 py-2.5 text-sm font-medium text-gray-900 bg-white border-b-2 border-primary-500 shadow-sm">
+                <span className="px-4 py-2.5 text-sm font-medium text-gray-900 bg-white border-b-2 border-indigo-500 shadow-sm">
                   Original PDF
                 </span>
               </div>
@@ -1006,7 +1126,7 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : activeNav === "home" ? (
-            <div className="p-8 max-w-6xl mx-auto">
+            <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto">
               {/* Greeting */}
               <h2 className="text-2xl font-bold text-gray-900 mt-2 text-center">
                 Hi, {user?.firstName || displayName.split(" ")[0] || "User"} 👋
@@ -1080,7 +1200,7 @@ export default function DashboardPage() {
                         }
                         className={`mt-4 w-full py-2.5 text-sm font-medium rounded-lg border transition shrink-0 ${
                           card.primary
-                            ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-[0_0_20px_rgba(16,185,129,0.5)]"
+                            ? "bg-violet-600 text-white border-violet-600 hover:bg-violet-700 shadow-[0_0_20px_rgba(139,92,246,0.45)]"
                             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                         }`}
                       >
@@ -1111,37 +1231,40 @@ export default function DashboardPage() {
             </div>
           ) : activeNav === "buy-credits" ? (
             <div className="flex-1 overflow-auto bg-gray-50">
-              <div className="bg-amber-100 text-amber-900 text-sm py-2 px-6 border-b border-amber-200">
+              <div className="bg-indigo-100 text-indigo-900 text-sm py-2 px-6 border-b border-indigo-200">
                 <span className="font-semibold">
                   Special offer for IN India users:
                 </span>{" "}
                 Use code{" "}
-                <span className="font-mono font-semibold bg-amber-200 px-1 rounded">
+                <span className="font-mono font-semibold bg-indigo-200 px-1 rounded">
                   INDIA25
                 </span>{" "}
                 for 25% off!{" "}
-                <span className="ml-2 inline-flex items-center rounded-full bg-blue-600 text-white text-xs px-2 py-0.5">
+                <span className="ml-2 inline-flex items-center rounded-full bg-indigo-600 text-white text-xs px-2 py-0.5">
                   UPI Supported
                 </span>
               </div>
-              <div className="max-w-5xl mx-auto py-8 px-4 space-y-10">
+              <div className="max-w-5xl mx-auto py-8 px-4 space-y-8">
                 <div className="text-center space-y-2">
-                  <p className="text-xs font-semibold tracking-[0.2em] text-emerald-500">
+                  <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">
                     PRICING
                   </p>
-                  <h2 className="text-3xl font-extrabold text-gray-900">
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
                     Buy Credits or{" "}
-                    <span className="text-emerald-500">Go Unlimited ✨</span>
+                    <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                      Go Unlimited
+                    </span>{" "}
+                    ✨
                   </h2>
                 </div>
                 <div className="flex justify-center">
-                  <div className="inline-flex rounded-full bg-gray-100 p-1 text-xs font-medium text-gray-700">
+                  <div className="inline-flex rounded-full border border-gray-200 bg-gray-100 p-1.5">
                     <button
                       type="button"
                       onClick={() =>
                         navigate("/dashboard/buyCredits?tab=credits")
                       }
-                      className={`px-4 py-1 rounded-full ${buyCreditsTab === "credits" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-200"}`}
+                      className={`px-5 sm:px-7 h-11 rounded-full text-sm font-semibold transition-all ${buyCreditsTab === "credits" ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_6px_16px_rgba(79,70,229,0.25)]" : "text-gray-600 hover:text-gray-900"}`}
                     >
                       Credits Only
                     </button>
@@ -1150,7 +1273,7 @@ export default function DashboardPage() {
                       onClick={() =>
                         navigate("/dashboard/buyCredits?tab=subscription")
                       }
-                      className={`px-4 py-1 rounded-full ${buyCreditsTab === "subscription" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-200"}`}
+                      className={`px-5 sm:px-7 h-11 rounded-full text-sm font-semibold transition-all ${buyCreditsTab === "subscription" ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_6px_16px_rgba(79,70,229,0.25)]" : "text-gray-600 hover:text-gray-900"}`}
                     >
                       Subscription
                     </button>
@@ -1159,7 +1282,7 @@ export default function DashboardPage() {
                       onClick={() =>
                         navigate("/dashboard/buyCredits?tab=lifetime")
                       }
-                      className={`px-4 py-1 rounded-full ${buyCreditsTab === "lifetime" ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-200"}`}
+                      className={`px-5 sm:px-7 h-11 rounded-full text-sm font-semibold transition-all ${buyCreditsTab === "lifetime" ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_6px_16px_rgba(79,70,229,0.25)]" : "text-gray-600 hover:text-gray-900"}`}
                     >
                       Lifetime
                     </button>
@@ -1222,8 +1345,8 @@ export default function DashboardPage() {
                     </div>
                     <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto w-full">
                       {/* Basic */}
-                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 flex flex-col items-center text-center hover:border-emerald-500 transition-colors">
-                        <div className="mb-2 text-emerald-500">
+                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 flex flex-col items-center text-center hover:border-violet-500 transition-colors">
+                        <div className="mb-2 text-violet-500">
                           <svg
                             width="24"
                             height="24"
@@ -1236,7 +1359,7 @@ export default function DashboardPage() {
                             <circle cx="12" cy="18" r="2" />
                           </svg>
                         </div>
-                        <h3 className="text-sm font-semibold text-emerald-500 mb-4">
+                        <h3 className="text-sm font-semibold text-violet-500 mb-4">
                           Basic
                         </h3>
                         <div className="flex flex-col items-center justify-center mb-6">
@@ -1252,7 +1375,10 @@ export default function DashboardPage() {
                         </p>
                         <button
                           type="button"
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-emerald-700 hover:bg-emerald-800 text-white transition-colors"
+                          onClick={() =>
+                            setCheckoutProduct(CHECKOUT_PRODUCTS.credits_basic)
+                          }
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-violet-700 hover:bg-violet-800 text-white transition-colors"
                         >
                           Get Credits{" "}
                           <svg
@@ -1272,7 +1398,7 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Plus (Highlighted) */}
-                      <div className="bg-emerald-700 rounded-xl shadow-md border-0 p-8 flex flex-col items-center text-center transform scale-105 z-10 relative">
+                      <div className="bg-violet-700 rounded-xl shadow-md border-0 p-8 flex flex-col items-center text-center transform scale-105 z-10 relative">
                         <div className="mb-2 text-white">
                           <svg
                             width="32"
@@ -1299,7 +1425,7 @@ export default function DashboardPage() {
                           <span className="text-4xl font-bold text-white">
                             ₹5,300
                           </span>
-                          <span className="text-sm text-green-100">
+                          <span className="text-sm text-violet-100">
                             ($59.00)
                           </span>
                         </div>
@@ -1308,7 +1434,10 @@ export default function DashboardPage() {
                         </p>
                         <button
                           type="button"
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-white hover:bg-gray-50 text-emerald-800 transition-colors"
+                          onClick={() =>
+                            setCheckoutProduct(CHECKOUT_PRODUCTS.credits_plus)
+                          }
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-white hover:bg-gray-50 text-violet-800 transition-colors"
                         >
                           Get Credits{" "}
                           <svg
@@ -1328,14 +1457,14 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Pro */}
-                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 flex flex-col items-center text-center hover:border-emerald-500 transition-colors">
+                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 flex flex-col items-center text-center hover:border-violet-500 transition-colors">
                         <div className="mb-2 flex items-center justify-center">
                           <svg
                             width="32"
                             height="32"
                             viewBox="0 0 24 24"
                             fill="currentColor"
-                            className="text-emerald-500 block"
+                            className="text-violet-500 block"
                           >
                             <circle cx="6" cy="10" r="1.5" />
                             <circle cx="10" cy="10" r="1.5" />
@@ -1367,7 +1496,7 @@ export default function DashboardPage() {
                             />
                           </svg>
                         </div>
-                        <h3 className="text-sm font-semibold text-emerald-500 mb-4">
+                        <h3 className="text-sm font-semibold text-violet-500 mb-4">
                           Pro
                         </h3>
                         <div className="flex flex-col items-center justify-center mb-6">
@@ -1383,7 +1512,10 @@ export default function DashboardPage() {
                         </p>
                         <button
                           type="button"
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-emerald-700 hover:bg-emerald-800 text-white transition-colors"
+                          onClick={() =>
+                            setCheckoutProduct(CHECKOUT_PRODUCTS.credits_pro)
+                          }
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-violet-700 hover:bg-violet-800 text-white transition-colors"
                         >
                           Get Credits{" "}
                           <svg
@@ -1459,8 +1591,8 @@ export default function DashboardPage() {
                     </div>
                     <div className="grid gap-6 md:grid-cols-2 max-w-3xl mx-auto w-full">
                       {/* Monthly */}
-                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 flex flex-col items-center text-center hover:border-emerald-500 transition-colors">
-                        <div className="mb-2 text-emerald-500">
+                      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 flex flex-col items-center text-center hover:border-violet-500 transition-colors">
+                        <div className="mb-2 text-violet-500">
                           <svg
                             width="32"
                             height="32"
@@ -1486,7 +1618,7 @@ export default function DashboardPage() {
                             <rect x="8" y="14" width="8" height="4" />
                           </svg>
                         </div>
-                        <h3 className="text-lg font-semibold text-emerald-500 mb-4">
+                        <h3 className="text-lg font-semibold text-violet-500 mb-4">
                           Monthly
                         </h3>
                         <div className="flex flex-col items-center justify-center mb-6">
@@ -1505,7 +1637,10 @@ export default function DashboardPage() {
                         </p>
                         <button
                           type="button"
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-emerald-800 hover:bg-emerald-900 text-white transition-colors"
+                          onClick={() =>
+                            setCheckoutProduct(CHECKOUT_PRODUCTS.sub_monthly)
+                          }
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-violet-800 hover:bg-violet-900 text-white transition-colors"
                         >
                           Subscribe{" "}
                           <svg
@@ -1525,7 +1660,7 @@ export default function DashboardPage() {
                       </div>
 
                       {/* Yearly (Highlighted) */}
-                      <div className="bg-emerald-800 rounded-xl shadow-md border-0 p-8 flex flex-col items-center text-center transform scale-105 z-10 relative">
+                      <div className="bg-violet-800 rounded-xl shadow-md border-0 p-8 flex flex-col items-center text-center transform scale-105 z-10 relative">
                         <div className="mb-2 text-white">
                           <svg
                             width="32"
@@ -1559,10 +1694,10 @@ export default function DashboardPage() {
                           <span className="text-4xl font-bold text-white">
                             ₹20,190
                           </span>
-                          <span className="text-sm text-green-100 mt-1">
+                          <span className="text-sm text-violet-100 mt-1">
                             ($224.90)
                           </span>
-                          <span className="text-xs text-green-100 mt-1">
+                          <span className="text-xs text-violet-100 mt-1">
                             per year
                           </span>
                         </div>
@@ -1571,7 +1706,10 @@ export default function DashboardPage() {
                         </p>
                         <button
                           type="button"
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-white hover:bg-gray-50 text-emerald-900 transition-colors"
+                          onClick={() =>
+                            setCheckoutProduct(CHECKOUT_PRODUCTS.sub_yearly)
+                          }
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-white hover:bg-gray-50 text-violet-900 transition-colors"
                         >
                           Subscribe{" "}
                           <svg
@@ -1646,7 +1784,7 @@ export default function DashboardPage() {
                       </span>
                     </div>
                     <div className="w-full max-w-sm mx-auto">
-                      <div className="bg-emerald-800 rounded-xl shadow-md border-0 p-8 flex flex-col items-center text-center">
+                      <div className="bg-violet-800 rounded-xl shadow-md border-0 p-8 flex flex-col items-center text-center">
                         <div className="mb-2 text-white">
                           <svg
                             width="40"
@@ -1679,10 +1817,10 @@ export default function DashboardPage() {
                           <span className="text-4xl font-bold text-white">
                             ₹40,990
                           </span>
-                          <span className="text-sm text-green-100 mt-1">
+                          <span className="text-sm text-violet-100 mt-1">
                             ($449.90)
                           </span>
-                          <span className="text-xs text-green-100 mt-1">
+                          <span className="text-xs text-violet-100 mt-1">
                             once
                           </span>
                         </div>
@@ -1691,7 +1829,10 @@ export default function DashboardPage() {
                         </p>
                         <button
                           type="button"
-                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-white hover:bg-gray-50 text-emerald-900 transition-colors"
+                          onClick={() =>
+                            setCheckoutProduct(CHECKOUT_PRODUCTS.lifetime)
+                          }
+                          className="w-full inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold px-4 py-3 bg-white hover:bg-gray-50 text-violet-900 transition-colors"
                         >
                           Get Lifetime{" "}
                           <svg
@@ -1712,6 +1853,31 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 )}
+                <div className="pt-2">
+                  <p className="text-center text-gray-500 text-sm font-medium">
+                    Accepted Payment Methods
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+                    {[
+                      "Visa",
+                      "Mastercard",
+                      "Amex",
+                      "Apple Pay",
+                      "Google Pay",
+                      "UPI",
+                      "GPay",
+                      "PhonePe",
+                    ].map((method) => (
+                      <span
+                        key={method}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs sm:text-sm text-gray-600"
+                      >
+                        <span className="text-gray-400">◳</span>
+                        {method}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ) : activeNav === "cvs" ? (
@@ -1737,7 +1903,7 @@ export default function DashboardPage() {
                           onClick={() => openPreview(r)}
                           className="flex items-center gap-2 min-w-0 text-left group"
                         >
-                          <span className="text-gray-900 text-sm font-medium truncate group-hover:text-primary-600 group-hover:underline">
+                          <span className="text-gray-900 text-sm font-medium truncate group-hover:text-indigo-600 group-hover:underline">
                             {r.title}
                           </span>
                           <span className="shrink-0 inline-flex items-center rounded-full bg-gray-100 text-gray-700 px-2 py-0.5 text-[11px] font-semibold">
@@ -2043,10 +2209,21 @@ export default function DashboardPage() {
                     </button>
                   </div>
                   <p className="text-sm text-gray-600">
-                    Call Credits:{" "}
-                    <span className="inline-block px-2 py-0.5 rounded-md bg-primary-100 text-primary-700 font-semibold">
-                      2.5
-                    </span>
+                    {billingUnlimited ? (
+                      <>
+                        Call credits:{" "}
+                        <span className="inline-block px-2 py-0.5 rounded-md bg-violet-100 text-violet-800 font-semibold">
+                          Unlimited (plan)
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        Call Credits:{" "}
+                        <span className="inline-block px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 font-semibold">
+                          {formatCreditsDisplay(billingCredits)}
+                        </span>
+                      </>
+                    )}
                   </p>
                 </section>
                 <section className="bg-white rounded-xl border border-gray-200 p-5">
@@ -2054,7 +2231,9 @@ export default function DashboardPage() {
                     Subscriptions
                   </h3>
                   <p className="text-xs text-gray-500 mb-3">
-                    No active subscription
+                    {billingUnlimited && billingPlanDisplay
+                      ? `Active (demo): ${billingPlanDisplay} — unlimited calls`
+                      : "No active subscription"}
                   </p>
                   <button
                     type="button"
@@ -2217,7 +2396,7 @@ export default function DashboardPage() {
 
                   {uploadSuccess ? (
                     <div className="py-6 text-center">
-                      <p className="text-base font-medium text-green-600">
+                      <p className="text-base font-medium text-violet-600">
                         {uploadSuccess}
                       </p>
                     </div>
@@ -2620,7 +2799,11 @@ export default function DashboardPage() {
                           }
                           className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:ring-2 focus:ring-gray-400 outline-none"
                         >
-                          <option>English</option>
+                          {AZURE_SPEECH_STT_LOCALES.map((opt) => (
+                            <option key={opt.locale} value={opt.locale}>
+                              {opt.label}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       <div className="flex-1">
@@ -2919,6 +3102,7 @@ export default function DashboardPage() {
                           launchDesktopApp(
                             createdSessionIdForLaunch,
                             createSessionForm.resumeId || undefined,
+                            createSessionForm.language,
                           );
                         finishChoosePlatform();
                       }}
@@ -2938,7 +3122,7 @@ export default function DashboardPage() {
                         />
                       </svg>
                       Desktop App
-                      <span className="absolute right-3 rounded-full bg-green-500/90 px-2 py-0.5 text-xs font-medium text-white">
+                      <span className="absolute right-3 rounded-full bg-violet-500/90 px-2 py-0.5 text-xs font-medium text-white">
                         Recommended
                       </span>
                     </button>
@@ -3036,6 +3220,7 @@ export default function DashboardPage() {
                       launchDesktopApp(
                         sessionForPlatformModal.id,
                         sessionForPlatformModal.resumeId,
+                        sessionForPlatformModal.language,
                       );
                       setSessionForPlatformModal(null);
                     }}
@@ -3055,7 +3240,7 @@ export default function DashboardPage() {
                       />
                     </svg>
                     Desktop App
-                    <span className="absolute right-3 rounded-full bg-green-500/90 px-2 py-0.5 text-xs font-medium text-white">
+                    <span className="absolute right-3 rounded-full bg-violet-500/90 px-2 py-0.5 text-xs font-medium text-white">
                       Recommended
                     </span>
                   </button>
@@ -3187,7 +3372,14 @@ export default function DashboardPage() {
           </div>
         )}
 
+        <PaymentCheckoutModal
+          product={checkoutProduct}
+          billingTab={buyCreditsTab}
+          onClose={() => setCheckoutProduct(null)}
+        />
+
         {/* Delete Resume confirmation modal */}
+
         {deleteResumeId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div

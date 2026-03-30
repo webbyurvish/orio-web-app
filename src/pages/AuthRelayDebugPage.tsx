@@ -78,7 +78,7 @@ export default function AuthRelayDebugPage() {
           <span>OrioAI</span>
         </div>
 
-        <div className="mx-auto mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+        <div className="mx-auto mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-violet-100 text-violet-600">
           <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>

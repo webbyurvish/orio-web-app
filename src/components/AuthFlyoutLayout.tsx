@@ -10,7 +10,7 @@ export function AuthFlyoutLayout({ children }: { children: React.ReactNode }) {
       <LandingPage />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="absolute inset-0 backdrop-blur-md bg-primary-100/30"
+          className="absolute inset-0 backdrop-blur-md bg-indigo-100/30"
           aria-hidden
         />
         {children}

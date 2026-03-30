@@ -6,6 +6,11 @@ import SignupPage from './pages/SignupPage'
 import DashboardPage from './pages/DashboardPage'
 import AuthRelayDebugPage from './pages/AuthRelayDebugPage'
 import AuthDesktopCompletePage from './pages/AuthDesktopCompletePage'
+import AffordableInterviewAssistantsPage from './pages/AffordableInterviewAssistantsPage'
+import ParakeetAlternativePage from './pages/ParakeetAlternativePage'
+import FinalRoundAlternativePage from './pages/FinalRoundAlternativePage'
+import InterviewWarmupAlternativePage from './pages/InterviewWarmupAlternativePage'
+import LockedInAlternativePage from './pages/LockedInAlternativePage'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
@@ -21,6 +26,11 @@ export default function App() {
       <Route path="/auth/desktop" element={<AuthRelayDebugPage />} />
       <Route path="/auth/desktop-complete" element={<AuthDesktopCompletePage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/affordable-interview-assistants" element={<AffordableInterviewAssistantsPage />} />
+      <Route path="/alternatives/parakeet-ai" element={<ParakeetAlternativePage />} />
+      <Route path="/alternatives/final-round-ai" element={<FinalRoundAlternativePage />} />
+      <Route path="/alternatives/interview-warmup" element={<InterviewWarmupAlternativePage />} />
+      <Route path="/alternatives/lockedin-ai" element={<LockedInAlternativePage />} />
       <Route
         path="/dashboard/*"
         element={

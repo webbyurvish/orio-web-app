@@ -83,14 +83,14 @@ export default function SignupPage() {
   return (
     <AuthFlyoutLayout>
       {/* Flyout panel - solid background, no transparency */}
-      <div className="relative w-full max-w-md rounded-2xl bg-amber-50 shadow-2xl border border-amber-200 overflow-hidden">
+      <div className="relative w-full max-w-md rounded-2xl bg-indigo-50 shadow-2xl border border-indigo-200 overflow-hidden">
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="p-2 -m-2 rounded-lg text-gray-500 hover:bg-amber-100 hover:text-gray-700 transition"
+              className="p-2 -m-2 rounded-lg text-gray-500 hover:bg-indigo-100 hover:text-gray-700 transition"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -177,10 +177,10 @@ export default function SignupPage() {
             <>
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-amber-200" />
+                  <div className="w-full border-t border-indigo-200" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-3 bg-amber-50 text-gray-500">Or continue with</span>
+                  <span className="px-3 bg-indigo-50 text-gray-500">Or continue with</span>
                 </div>
               </div>
               <div className="flex justify-center">
@@ -199,7 +199,7 @@ export default function SignupPage() {
 
           <p className="mt-6 text-center text-gray-700 text-sm">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-600 font-semibold hover:underline">
+            <Link to="/login" className="text-indigo-600 font-semibold hover:underline">
               Sign in
             </Link>
           </p>

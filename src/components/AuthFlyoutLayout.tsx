@@ -1,20 +1,15 @@
-import LandingPage from '../pages/LandingPage'
-
 /**
- * Renders the landing page as background and a blurred overlay (outside only).
- * Transparency/blur is on the outside; children (the flyout card) should be solid.
+ * Centered auth flyout over the Aurora shell (mesh from parent OrioAppShell).
+ * Dark scrim + blur outside; children should use a solid panel (e.g. orio-panel).
  */
 export function AuthFlyoutLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <LandingPage />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="absolute inset-0 backdrop-blur-md bg-indigo-100/30"
-          aria-hidden
-        />
-        {children}
-      </div>
-    </>
+    <div className="fixed inset-0 z-50 flex min-h-dvh items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-[#050508]/80 backdrop-blur-xl"
+        aria-hidden
+      />
+      <div className="relative z-[1] w-full max-w-lg">{children}</div>
+    </div>
   )
 }

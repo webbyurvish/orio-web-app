@@ -3,8 +3,9 @@ export type SpeechLocaleOption = {
   label: string
 }
 
-// Curated list of commonly used locales supported by Azure Speech-to-Text (BCP-47).
-// Intentionally excludes most country variants to keep the dropdown simple.
+// Curated BCP-47 locales for Smeed AI interviews: Azure Speech-to-Text (live transcription)
+// and Azure OpenAI (multilingual answers). Same list is used on the landing page and in
+// session creation (web + desktop). Intentionally excludes country variants we don’t use.
 export const AZURE_SPEECH_STT_LOCALES: SpeechLocaleOption[] = [
   // Pinned at top
   { locale: 'en-IN', label: 'English (India)' },

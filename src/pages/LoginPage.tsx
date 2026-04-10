@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query'
 import { GoogleLogin } from '@react-oauth/google'
 import { authApi } from '../api/auth'
 import { useAuthStore } from '../store/authStore'
+import { useBillingStore } from '../store/billingStore'
 import { AuthFlyoutLayout } from '../components/AuthFlyoutLayout'
 
 const loginSchema = z.object({
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const setAuth = useAuthStore((s) => s.setAuth)
+  const setCreditsFromServer = useBillingStore((s) => s.setCreditsFromServer)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -40,6 +42,7 @@ export default function LoginPage() {
     mutationFn: authApi.login,
     onSuccess: (data) => {
       setAuth(data.user, data.token)
+      setCreditsFromServer(data.user.callCredits ?? 0)
       const destination = callbackUrl || '/dashboard'
       console.info('[WEB-AUTH] Login success', { destination, callbackUrl })
       navigate(destination)
@@ -67,6 +70,7 @@ export default function LoginPage() {
     try {
       const data = await authApi.googleLogin(token)
       setAuth(data.user, data.token)
+      setCreditsFromServer(data.user.callCredits ?? 0)
       const destination = callbackUrl || '/dashboard'
       console.info('[WEB-AUTH] Google login success', { destination, callbackUrl })
       navigate(destination)
@@ -86,47 +90,53 @@ export default function LoginPage() {
 
   return (
     <AuthFlyoutLayout>
-      {/* Flyout panel - solid background, no transparency */}
-      <div className="relative w-full max-w-md rounded-2xl bg-indigo-50 shadow-2xl border border-indigo-200 overflow-hidden">
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Sign In</h1>
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="p-2 -m-2 rounded-lg text-gray-500 hover:bg-indigo-100 hover:text-gray-700 transition"
-              aria-label="Close"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+      <div className="auth-card">
+        <div className="auth-card-head">
+          <div className="auth-card-brand">
+            <img className="auth-card-mark" src="/assets/smeed-logo.png" alt="" aria-hidden draggable={false} />
+            <div className="auth-card-brandtext">Smeed AI</div>
           </div>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="auth-icon-btn"
+            aria-label="Close"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className="mt-5">
+          <h1 className="auth-card-title">Welcome back</h1>
+          <p className="auth-card-subtitle">Sign in to continue</p>
+        </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+            <div className="auth-alert auth-alert-error">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit(onEmailSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onEmailSubmit)} className="space-y-4 mt-5">
             <div>
-              <label className="block text-sm font-medium text-gray-800 mb-1.5">Email</label>
+              <label className="auth-label">Email</label>
               <input
                 type="email"
                 {...register('email')}
                 className="auth-input"
-                placeholder="Enter your email"
+                placeholder="you@example.com"
                 autoComplete="email"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="auth-field-error">{errors.email.message}</p>
               )}
             </div>
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-sm font-medium text-gray-800">Password</label>
-                <a href="#" className="text-sm text-indigo-600 hover:text-indigo-700 hover:underline">
+                <label className="auth-label mb-0">Password</label>
+                <a href="#" className="auth-link text-sm">
                   Forgot password?
                 </a>
               </div>
@@ -135,13 +145,13 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   {...register('password')}
                   className="auth-input pr-10"
-                  placeholder="Enter your password"
+                  placeholder="••••••••"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((p) => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700"
+                  className="auth-eye-btn"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
@@ -157,7 +167,7 @@ export default function LoginPage() {
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="auth-field-error">{errors.password.message}</p>
               )}
             </div>
             <button
@@ -165,7 +175,7 @@ export default function LoginPage() {
               disabled={loginMutation.isPending}
               className="auth-btn-primary w-full"
             >
-              {loginMutation.isPending ? 'Signing in...' : 'Sign In'}
+              {loginMutation.isPending ? 'Signing in...' : 'Sign In →'}
             </button>
           </form>
 
@@ -173,10 +183,10 @@ export default function LoginPage() {
             <>
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-indigo-200" />
+                  <div className="w-full border-t border-white/10" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-3 bg-indigo-50 text-gray-500">Or continue with</span>
+                  <span className="px-3 auth-divider-pill">Or continue with</span>
                 </div>
               </div>
               <div className="flex justify-center">
@@ -193,13 +203,12 @@ export default function LoginPage() {
             </>
           )}
 
-          <p className="mt-6 text-center text-gray-700 text-sm">
+          <p className="mt-6 text-center text-sm auth-muted">
             Don&apos;t have an account?{' '}
-            <Link to="/signup" className="text-indigo-600 font-semibold hover:underline">
+            <Link to="/signup" className="auth-link font-semibold">
               Sign up
             </Link>
           </p>
-        </div>
       </div>
     </AuthFlyoutLayout>
   )

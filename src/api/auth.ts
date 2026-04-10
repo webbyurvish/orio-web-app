@@ -7,6 +7,9 @@ export interface UserDto {
   lastName: string
   profilePictureUrl?: string
   isEmailVerified: boolean
+  callCredits: number
+  hasDiscoveryResponse?: boolean
+  isAdmin?: boolean
 }
 
 export interface AuthResponse {
@@ -19,6 +22,14 @@ export interface RegisterRequest {
   password: string
   firstName: string
   lastName: string
+}
+
+export interface RegisterInitiateRequest {
+  email: string
+}
+
+export interface RegisterVerifyRequest extends RegisterRequest {
+  code: string
 }
 
 export interface LoginRequest {
@@ -41,6 +52,13 @@ export const authApi = {
     const res = await apiClient.post<AuthResponse>('/auth/register', data)
     return res.data
   },
+  registerInitiate: async (data: RegisterInitiateRequest): Promise<void> => {
+    await apiClient.post('/auth/register/initiate', data)
+  },
+  registerVerify: async (data: RegisterVerifyRequest): Promise<AuthResponse> => {
+    const res = await apiClient.post<AuthResponse>('/auth/register/verify', data)
+    return res.data
+  },
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const res = await apiClient.post<AuthResponse>('/auth/login', data)
     return res.data
@@ -52,6 +70,9 @@ export const authApi = {
   getCurrentUser: async (): Promise<UserDto> => {
     const res = await apiClient.get<UserDto>('/auth/me')
     return res.data
+  },
+  saveDiscovery: async (data: { source: string; otherText?: string }): Promise<void> => {
+    await apiClient.post('/auth/discovery', data)
   },
   desktopInitiate: async (data: DesktopAuthInitiateRequest): Promise<DesktopAuthInitiateResponse> => {
     const res = await apiClient.post<DesktopAuthInitiateResponse>('/auth/desktop/initiate', data)

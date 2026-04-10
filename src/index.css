@@ -1,12 +1,139 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=Inter:wght@400;500;600;700;800&family=Syne:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ───────── Skeleton shimmer ───────── */
+.orio-skeleton {
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.orio-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 30%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.08) 70%,
+    transparent 100%
+  );
+  transform: translateX(-120%);
+  animation: orio-skeleton-shimmer 1.05s ease-in-out infinite;
+}
+
+@keyframes orio-skeleton-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orio-skeleton::after {
+    animation: none !important;
+    opacity: 0.55;
+  }
+}
+
+/* ───────── Top loading bar ───────── */
+.orio-top-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 9999;
+  background: transparent;
+  pointer-events: none;
+}
+
+.orio-top-loader__bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #2dd4bf, #a78bfa, #e879f9);
+  box-shadow: 0 0 18px rgba(45, 212, 191, 0.35);
+  border-radius: 999px;
+  transition: width 180ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.orio-top-loader__bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.55) 45%,
+    transparent 90%
+  );
+  transform: translateX(-60%);
+  animation: orio-top-loader-shimmer 900ms ease-in-out infinite;
+}
+
+@keyframes orio-top-loader-shimmer {
+  0% {
+    transform: translateX(-60%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+/* ───────── Root body & typography ───────── */
 body {
-  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  @apply antialiased bg-white text-gray-900;
+  font-family:
+    "Inter",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+  @apply antialiased text-gray-900;
+  background-color: #fafbff;
+  background-image:
+    radial-gradient(
+      ellipse 110% 70% at 50% -18%,
+      rgba(99, 102, 241, 0.07),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 55% 50% at 96% 6%,
+      rgba(168, 120, 255, 0.06),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 45% 38% at 4% 35%,
+      rgba(255, 126, 179, 0.04),
+      transparent 55%
+    ),
+    linear-gradient(180deg, #fbfbff 0%, #f8f7fd 48%, #faf8fe 100%);
+}
+
+/* Workspace shells (dashboard, admin, long-form pages). */
+.orio-workspace-bg {
+  background-image:
+    radial-gradient(
+      ellipse 90% 55% at 50% -10%,
+      rgba(99, 102, 241, 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 40% 35% at 100% 20%,
+      rgba(139, 92, 246, 0.06),
+      transparent 50%
+    ),
+    linear-gradient(165deg, #f5f4fb 0%, #f6f3fd 50%, #f3f6fc 100%);
 }
 
 html {
@@ -19,91 +146,637 @@ input,
 textarea,
 select {
   transition:
-    color 180ms ease,
-    background-color 180ms ease,
-    border-color 180ms ease,
-    box-shadow 220ms ease,
-    transform 220ms ease,
-    opacity 180ms ease;
+    color 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 250ms ease,
+    transform 250ms ease,
+    opacity 200ms ease;
 }
 
+/* ───────── Form primitives ───────── */
 .input-field {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition;
+  @apply w-full px-4 py-3 border border-gray-200 rounded-xl
+    focus:ring-2 focus:ring-indigo-400/40 focus:border-indigo-400 outline-none transition;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .btn-primary {
-  @apply w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply w-full py-3 px-4 bg-indigo-600 text-white font-semibold rounded-xl
+    hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
+    transition disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .btn-secondary {
-  @apply w-full py-3 px-4 bg-white text-indigo-600 border-2 border-indigo-600 font-semibold rounded-lg hover:bg-indigo-50 transition disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply w-full py-3 px-4 bg-white text-indigo-600 border-2 border-indigo-600
+    font-semibold rounded-xl hover:bg-indigo-50 transition
+    disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .card {
-  @apply bg-white rounded-xl shadow-lg border border-gray-100 p-6;
+  @apply bg-white/80 backdrop-blur-sm rounded-2xl border border-white/30
+    shadow-[0_4px_20px_rgba(0,0,0,0.04)] p-6;
 }
 
-/* Sign In / Sign Up flyout modal */
+/* Auth modals */
 .auth-input {
-  @apply w-full px-4 py-3 bg-indigo-50/80 border border-indigo-200 rounded-xl text-gray-900 placeholder:text-gray-400
-    focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 outline-none transition;
+  @apply w-full px-4 py-3 bg-indigo-50/60 border border-indigo-200/60 rounded-xl
+    text-gray-900 placeholder:text-gray-400
+    focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 outline-none transition;
+}
+
+.auth-shell {
+  @apply fixed inset-0 z-50 min-h-dvh;
+  font-family:
+    "Plus Jakarta Sans",
+    "DM Sans",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+}
+
+/* Simple centered auth card (no split marketing panel) */
+.auth-card {
+  @apply relative mx-auto w-full max-w-md overflow-hidden rounded-2xl border border-white/10;
+  padding: 22px;
+  background: linear-gradient(180deg, rgba(18,18,28,0.92) 0%, rgba(12,12,18,0.86) 100%);
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.55),
+    0 1px 0 rgba(255,255,255,0.06) inset;
+  animation: authRightIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.auth-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.auth-card-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.auth-card-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 14px 38px rgba(0,0,0,0.45);
+  object-fit: contain;
+  padding: 4px;
+}
+.auth-card-brandtext {
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  color: rgba(226, 232, 240, 0.92);
+}
+.auth-card-title {
+  font-size: 26px;
+  line-height: 1.12;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--orio-text);
+  font-family:
+    "Space Grotesk",
+    "Plus Jakarta Sans",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+}
+.auth-card-subtitle {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: rgba(226, 232, 240, 0.72);
+}
+.auth-otp-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Select dropdown styling (resume picker etc.) */
+.orio-select-chevron {
+  transition: transform 160ms ease, opacity 160ms ease;
+  opacity: 0.9;
+}
+.orio-select:focus ~ .orio-select-chevron,
+.orio-select:active ~ .orio-select-chevron {
+  transform: translateY(-50%) rotate(180deg);
+  opacity: 1;
+}
+.orio-select option {
+  background-color: rgba(18, 18, 28, 0.98);
+  color: rgba(226, 232, 240, 0.95);
+}
+.orio-select optgroup {
+  background-color: rgba(18, 18, 28, 0.98);
+  color: rgba(226, 232, 240, 0.75);
+}
+.auth-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1200px 800px at 25% 15%, rgba(167, 139, 250, 0.22) 0%, transparent 55%),
+    radial-gradient(900px 700px at 75% 70%, rgba(45, 212, 191, 0.16) 0%, transparent 56%),
+    rgba(5, 5, 8, 0.86);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.auth-split-page {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  grid-template-areas: "left right";
+  animation: authCardIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.auth-split-page--form-left {
+  grid-template-areas: "right left";
+}
+
+.auth-split-left {
+  grid-area: left;
+  position: relative;
+  overflow: hidden;
+  /* Smeed AI aurora: deep base + crisp teal/violet accents (cleaner than pastel wash) */
+  background:
+    radial-gradient(900px 620px at 20% 20%, rgba(45, 212, 191, 0.60) 0%, transparent 58%),
+    radial-gradient(980px 740px at 78% 74%, rgba(167, 139, 250, 0.68) 0%, transparent 60%),
+    radial-gradient(760px 520px at 56% 26%, rgba(232, 121, 249, 0.26) 0%, transparent 62%),
+    linear-gradient(145deg, #07070c 0%, #0a0b14 42%, #070713 100%);
+}
+.auth-split-left::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,0.35) 0%, transparent 46%),
+    radial-gradient(circle at 70% 65%, rgba(255,255,255,0.22) 0%, transparent 52%),
+    radial-gradient(circle at 55% 95%, rgba(255,255,255,0.18) 0%, transparent 58%);
+  filter: blur(10px);
+  opacity: 0.55;
+  animation: authGlowFloat 7.5s ease-in-out infinite;
+}
+.auth-split-left::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1000px 720px at 22% 22%, rgba(0,0,0,0.28) 0%, transparent 58%),
+    radial-gradient(980px 760px at 78% 78%, rgba(0,0,0,0.32) 0%, transparent 60%),
+    linear-gradient(
+      180deg,
+      rgba(0,0,0,0.16) 0%,
+      rgba(0,0,0,0.34) 55%,
+      rgba(0,0,0,0.56) 100%
+    );
+  pointer-events: none;
+}
+
+.auth-split-left-inner {
+  position: relative;
+  height: 100%;
+  padding: clamp(44px, 5.2vw, 72px) clamp(28px, 4.8vw, 72px);
+  color: rgba(255,255,255,0.95);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  justify-content: center;
+}
+
+/* Subtle premium pattern + soft lighting so the left side feels designed */
+.auth-split-left-inner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.09) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: 0.20;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+.auth-split-left-inner::after {
+  content: "";
+  position: absolute;
+  inset: -50px;
+  background:
+    radial-gradient(520px 420px at 20% 18%, rgba(255,255,255,0.10), transparent 62%),
+    radial-gradient(560px 460px at 78% 72%, rgba(255,255,255,0.07), transparent 64%);
+  opacity: 0.55;
+  filter: blur(16px);
+  pointer-events: none;
+}
+
+.auth-brand-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.auth-brand-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.16);
+  object-fit: contain;
+  padding: 4px;
+}
+.auth-brand-name {
+  font-weight: 650;
+  letter-spacing: 0.2px;
+  opacity: 0.95;
+}
+
+.auth-left-hero {
+  margin-top: 8px;
+  padding: 26px 26px 22px;
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.06) 100%);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow:
+    0 26px 88px rgba(0,0,0,0.52),
+    0 1px 0 rgba(255,255,255,0.10) inset;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: authLeftIn 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 90ms;
+}
+.auth-left-icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: rgba(0,0,0,0.18);
+  border: 1px solid rgba(255,255,255,0.18);
+  font-size: 22px;
+  margin-bottom: 16px;
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.18),
+    0 1px 0 rgba(255,255,255,0.22) inset;
+}
+.auth-left-title {
+  font-size: clamp(34px, 4.1vw, 52px);
+  line-height: 1.04;
+  font-weight: 720;
+  letter-spacing: -0.03em;
+  font-family:
+    "Space Grotesk",
+    "Syne",
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    sans-serif;
+  color: #ffffff;
+  text-shadow:
+    0 24px 70px rgba(0,0,0,0.42),
+    0 2px 0 rgba(0,0,0,0.14);
+}
+.auth-left-subtitle {
+  margin-top: 10px;
+  max-width: 520px;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.94);
+  text-shadow: 0 22px 56px rgba(0,0,0,0.38);
+}
+.auth-left-bullets {
+  margin-top: 18px;
+  display: grid;
+  gap: 12px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 18px 46px rgba(0,0,0,0.34);
+}
+.auth-left-bullets li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.auth-left-check {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  background: rgba(45, 212, 191, 0.22);
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  margin-top: 2px;
+  color: rgba(255,255,255,0.98);
+}
+
+/* Slightly stronger presence + staggered entrance for readability */
+.auth-left-hero {
+  animation: authLeftIn 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 90ms;
+}
+.auth-left-bullets li {
+  animation: authLeftIn 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 170ms;
+}
+.auth-left-bullets li:nth-child(2) { animation-delay: 230ms; }
+.auth-left-bullets li:nth-child(3) { animation-delay: 290ms; }
+.auth-left-bullets li:nth-child(4) { animation-delay: 350ms; }
+
+.auth-split-right {
+  grid-area: right;
+  background: rgba(10, 10, 16, 0.86);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.auth-split-right-inner {
+  height: 100%;
+  padding: clamp(40px, 4.6vw, 68px) clamp(20px, 4vw, 72px);
+  display: grid;
+  place-items: center;
+}
+
+.auth-form-card {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  animation: authRightIn 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 120ms;
+  padding: 26px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: linear-gradient(180deg, rgba(18,18,28,0.78) 0%, rgba(12,12,18,0.68) 100%);
+  box-shadow:
+    0 18px 60px rgba(0,0,0,0.45),
+    0 1px 0 rgba(255,255,255,0.05) inset;
+}
+.auth-form-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.auth-form-title {
+  font-size: 28px;
+  line-height: 1.15;
+  font-weight: 760;
+  color: var(--orio-text);
+  letter-spacing: -0.02em;
+}
+.auth-form-subtitle {
+  margin-top: 6px;
+  font-size: 13.5px;
+  color: rgba(226, 232, 240, 0.78);
+}
+
+.auth-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: rgba(226, 232, 240, 0.8);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+.auth-icon-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.12);
+}
+
+.auth-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.auth-field-error {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: rgba(248, 113, 113, 0.95);
+}
+
+.auth-link {
+  color: rgba(167, 139, 250, 0.98);
+}
+.auth-link:hover {
+  text-decoration: underline;
+}
+.auth-muted {
+  color: rgba(226, 232, 240, 0.75);
+}
+
+.auth-eye-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 6px;
+  border-radius: 10px;
+  color: rgba(226, 232, 240, 0.75);
+  transition: background 160ms ease, color 160ms ease;
+}
+.auth-eye-btn:hover {
+  background: rgba(255,255,255,0.06);
+  color: rgba(226, 232, 240, 0.95);
+}
+
+.auth-divider-pill {
+  border-radius: 999px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(226, 232, 240, 0.65);
+}
+
+.auth-alert {
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 13px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+  color: rgba(226, 232, 240, 0.88);
+}
+.auth-alert-error {
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(248, 113, 113, 0.08);
+  color: rgba(254, 202, 202, 0.95);
+}
+
+.auth-email-pill {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(226, 232, 240, 0.92);
+}
+
+.auth-otp-input {
+  @apply w-full h-12 rounded-xl px-4 text-center text-xl font-semibold;
+  letter-spacing: 0.45em;
+  background: rgba(45, 212, 191, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--orio-text);
+  outline: none;
+  transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+.auth-otp-input:focus {
+  border-color: rgba(167, 139, 250, 0.45);
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.16);
+}
+
+@keyframes authCardIn {
+  0% { opacity: 0; transform: translateY(10px) scale(0.985); filter: blur(6px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes authLeftIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes authRightIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes authGlowFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2.5%, -2%, 0) scale(1.02); }
+}
+
+@media (max-width: 920px) {
+  .auth-split-page {
+    grid-template-columns: 1fr;
+    grid-template-areas: "right";
+  }
+  .auth-split-left {
+    display: none;
+  }
+  .auth-split-right-inner {
+    padding: 34px 18px;
+  }
+  .auth-form-card {
+    padding: 22px;
+    border-radius: 20px;
+  }
 }
 
 .auth-btn-primary {
-  @apply py-3 px-6 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700
-    focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply py-3 px-6 text-white font-semibold rounded-xl
+    focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition
+    disabled:opacity-50 disabled:cursor-not-allowed;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+.auth-btn-primary:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.25);
+  transform: translateY(-1px);
 }
 
+/* ───────── SaaS primitives ───────── */
 .saas-container {
   @apply max-w-[1200px] mx-auto px-4;
 }
 
 .saas-section {
-  @apply py-16 md:py-24;
-  animation: sectionFadeIn 480ms ease-out both;
+  @apply py-20 md:py-28;
+  animation: sectionFadeIn 600ms ease-out both;
 }
 
 .saas-card {
-  @apply bg-white rounded-2xl border border-gray-200 shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-5 md:p-6;
+  @apply rounded-2xl p-5 md:p-6;
+  background: linear-gradient(168deg, rgba(255,255,255,0.95) 0%, rgba(250,251,255,0.85) 55%, rgba(245,247,255,0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 4px 24px rgba(79, 70, 229, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   transition:
-    transform 220ms ease,
-    box-shadow 220ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease;
+    transform 250ms ease,
+    box-shadow 250ms ease,
+    border-color 200ms ease;
 }
 
 .saas-card-hover {
-  @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_20px_rgba(0,0,0,0.08)];
+  @apply transition-all duration-200;
+}
+.saas-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(79, 70, 229, 0.1);
+  border-color: rgba(199, 210, 254, 0.6);
 }
 
+/* ───────── Buttons ───────── */
 .saas-btn-primary {
-  @apply inline-flex items-center justify-center rounded-xl px-6 py-3 font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02];
-  background-image: linear-gradient(135deg, #4f46e5, #7c3aed);
+  @apply inline-flex items-center justify-center rounded-[12px] px-7 py-3.5 font-semibold text-white shadow-md transition-all duration-200;
+  background: linear-gradient(135deg, #ff7eb3, #ff758c, #7aa2ff);
+  position: relative;
+  overflow: hidden;
 }
-
+.saas-btn-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
 .saas-btn-primary:hover {
-  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.28);
-  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(255, 117, 140, 0.35), 0 0 0 1px rgba(255, 126, 179, 0.15);
+  transform: translateY(-2px) scale(1.02);
 }
-
 .saas-btn-primary:active {
-  transform: translateY(0);
-  box-shadow: 0 8px 18px rgba(124, 58, 237, 0.24);
+  transform: translateY(0) scale(1);
+  box-shadow: 0 4px 16px rgba(255, 117, 140, 0.25);
 }
 
 .saas-btn-secondary {
-  @apply inline-flex items-center justify-center rounded-xl px-6 py-3 font-semibold text-gray-700 bg-white border border-gray-200 transition-all duration-200 hover:scale-[1.02] hover:bg-gray-50;
+  @apply inline-flex items-center justify-center rounded-[12px] px-7 py-3.5 font-semibold transition-all duration-200;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(200, 210, 255, 0.5);
+  color: #374151;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
-
 .saas-btn-secondary:hover {
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   transform: translateY(-1px);
+  border-color: rgba(165, 180, 252, 0.6);
 }
-
 .saas-btn-secondary:active {
   transform: translateY(0);
 }
 
+/* ───────── Marquees ───────── */
 .logo-marquee {
   @apply relative overflow-hidden;
   mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
@@ -116,13 +789,11 @@ select {
 }
 
 .logo-item {
-  @apply h-12 w-28 flex items-center justify-center opacity-90 hover:opacity-100 transition;
+  @apply h-12 w-28 flex items-center justify-center transition-opacity duration-300;
 }
-
 .logo-item img {
   @apply max-h-10 max-w-full object-contain;
 }
-
 .logo-item img.google-logo-lg {
   @apply max-h-12;
 }
@@ -130,7 +801,6 @@ select {
 .platform-logo-chip {
   @apply h-12 w-20 md:h-14 md:w-24 flex items-center justify-center transition-all duration-200 hover:scale-105;
 }
-
 .platform-logo-chip img {
   @apply max-h-8 md:max-h-10 max-w-full object-contain;
 }
@@ -145,34 +815,820 @@ select {
   @apply flex items-center gap-2.5 w-max;
   animation: languageMarquee 52s linear infinite;
 }
-
 .language-marquee-track.reverse {
   animation-direction: reverse;
 }
 
 .language-pill {
-  @apply inline-flex items-center rounded-full border border-indigo-100 bg-indigo-50/70 px-3 py-1 text-xs font-medium text-indigo-900 whitespace-nowrap;
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap;
+  background: rgba(238, 242, 255, 0.7);
+  border: 1px solid rgba(199, 210, 254, 0.4);
+  color: #312e81;
+  backdrop-filter: blur(4px);
 }
 
+/* ───────── Glass card utility ───────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  border-radius: 20px;
+  transition: transform 250ms ease, box-shadow 250ms ease;
+}
+.glass-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.06), 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+}
+
+/* Soft section separators with gradient dividers */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(199, 210, 254, 0.5) 20%, rgba(196, 181, 253, 0.4) 50%, rgba(199, 210, 254, 0.5) 80%, transparent);
+}
+
+/* ───────── Keyframes ───────── */
 @keyframes logoMarquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @keyframes languageMarquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @keyframes sectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+/* ═══════════ Smeed AI — Aurora Stealth tokens (landing + app shell) ═══════════ */
+.orio-landing,
+.orio-app {
+  --orio-void: #050508;
+  --orio-surface: #0c0c12;
+  --orio-elevated: #12121c;
+  --orio-border: rgba(255, 255, 255, 0.08);
+  --orio-teal: #2dd4bf;
+  --orio-violet: #a78bfa;
+  --orio-fuchsia: #e879f9;
+  --orio-text: #e2e8f0;
+  --orio-muted: #94a3b8;
+  font-family:
+    "DM Sans",
+    "Inter",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+  background-color: var(--orio-void);
+  color: var(--orio-text);
+}
+
+.orio-app {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.orio-landing h1,
+.orio-landing h2,
+.orio-landing h3,
+.orio-landing .orio-font-display,
+.orio-app h1,
+.orio-app h2,
+.orio-app h3,
+.orio-app .orio-font-display {
+  font-family:
+    "Syne",
+    "DM Sans",
+    ui-sans-serif,
+    sans-serif;
+}
+
+.orio-hero-mesh {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.orio-hero-mesh::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(ellipse 50% 40% at 20% 30%, rgba(45, 212, 191, 0.15), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 80% 20%, rgba(167, 139, 250, 0.18), transparent 50%),
+    radial-gradient(ellipse 40% 45% at 60% 80%, rgba(232, 121, 249, 0.1), transparent 55%);
+  animation: orio-mesh-drift 18s ease-in-out infinite alternate;
+}
+
+.orio-hero-mesh::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black, transparent);
+  opacity: 0.5;
+  animation: orio-grid-pan 40s linear infinite;
+}
+
+@keyframes orio-mesh-drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  100% {
+    transform: translate(-4%, 3%) rotate(3deg);
+  }
+}
+
+@keyframes orio-grid-pan {
+  0% {
+    background-position: 0 0, 0 0;
+  }
+  100% {
+    background-position: 48px 48px, 48px 48px;
+  }
+}
+
+.orio-shimmer-text {
+  background: linear-gradient(
+    105deg,
+    #f0fdfa 0%,
+    #2dd4bf 25%,
+    #a78bfa 50%,
+    #e879f9 75%,
+    #f0fdfa 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: orio-shimmer-text 7s linear infinite;
+}
+
+@keyframes orio-shimmer-text {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.orio-scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(45, 212, 191, 0.5), transparent);
+  animation: orio-scan 3.2s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+@keyframes orio-scan {
+  0% {
+    top: 8%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 92%;
+    opacity: 0;
+  }
+}
+
+.orio-reveal {
+  opacity: 0;
+  transform: translateY(36px) scale(0.98);
+  filter: blur(10px);
+  transition:
+    opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.65s ease;
+}
+
+.orio-reveal--in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+
+.orio-card-drift {
+  animation: orio-card-float 7s ease-in-out infinite;
+}
+
+@keyframes orio-card-float {
+  0%,
+  100% {
+    transform: translateY(0) rotateX(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotateX(2deg);
+  }
+}
+
+.orio-tilt-wrap {
+  perspective: 1200px;
+}
+
+.orio-tilt {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.orio-tilt:hover {
+  transform: rotateX(5deg) rotateY(-6deg) translateZ(0);
+}
+
+.orio-glow-ring {
+  position: relative;
+}
+
+.orio-glow-ring::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #2dd4bf, #a78bfa, #e879f9, #2dd4bf);
+  background-size: 300% 300%;
+  animation: orio-border-flow 5s linear infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+@keyframes orio-border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.orio-btn-aurora {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 999px;
+  color: #042f2e;
+  background: linear-gradient(135deg, #5eead4, #a78bfa, #f0abfc);
+  background-size: 200% 200%;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+    0 12px 40px rgba(45, 212, 191, 0.25),
+    0 4px 16px rgba(167, 139, 250, 0.2);
+  animation: orio-btn-bg 6s ease infinite;
+  overflow: hidden;
+}
+
+.orio-btn-aurora:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+    0 20px 50px rgba(45, 212, 191, 0.35),
+    0 8px 24px rgba(232, 121, 249, 0.2);
+}
+
+.orio-btn-aurora:active {
+  transform: translateY(0) scale(1);
+}
+
+@keyframes orio-btn-bg {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.orio-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 999px;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+}
+
+.orio-btn-ghost:hover {
+  border-color: rgba(45, 212, 191, 0.35);
+  background: rgba(45, 212, 191, 0.08);
+  box-shadow: 0 0 24px rgba(45, 212, 191, 0.12);
+}
+
+.orio-panel {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(165deg, rgba(18, 18, 28, 0.92) 0%, rgba(12, 12, 18, 0.88) 100%);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  backdrop-filter: blur(20px);
+}
+
+.orio-landing .language-pill {
+  background: rgba(45, 212, 191, 0.08);
+  border-color: rgba(45, 212, 191, 0.2);
+  color: #ccfbf1;
+}
+
+.orio-landing .logo-item {
+  opacity: 1;
+  filter: none;
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+.orio-landing .logo-item:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}
+
+/* ───────── Customer voices — dual auto-scroll marquees ───────── */
+@keyframes customer-voices-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes customer-voices-scroll-reverse {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.orio-landing .customer-voices-wrap {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+
+.orio-landing .customer-voices-track {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  gap: 1.25rem;
+  padding: 0.35rem 0;
+  animation: customer-voices-scroll 56s linear infinite;
+  will-change: transform;
+}
+
+.orio-landing .customer-voices-track--reverse {
+  animation-name: customer-voices-scroll-reverse;
+  animation-duration: 68s;
+}
+
+@media (hover: hover) {
+  .orio-landing .customer-voices-wrap:hover .customer-voices-track {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orio-landing .customer-voices-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+    mask-image: none;
+    -webkit-mask-image: none;
+    scrollbar-width: thin;
+  }
+
+  .orio-landing .customer-voices-track,
+  .orio-landing .customer-voices-track--reverse {
+    animation: none !important;
+    padding-bottom: 0.75rem;
+  }
+}
+
+/* ───────── App shell: workspace + Tailwind light-ui remaps (dashboard / admin) ───────── */
+.orio-app .orio-workspace-bg {
+  background-color: transparent;
+  background-image:
+    radial-gradient(
+      ellipse 100% 55% at 50% -8%,
+      rgba(45, 212, 191, 0.1),
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse 42% 38% at 0% 45%,
+      rgba(167, 139, 250, 0.08),
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse 40% 42% at 100% 55%,
+      rgba(232, 121, 249, 0.06),
+      transparent 48%
+    ),
+    linear-gradient(180deg, #050508 0%, #0a0a12 45%, #06060c 100%);
+}
+
+.orio-app .saas-card {
+  background: linear-gradient(
+    165deg,
+    rgba(22, 22, 34, 0.94) 0%,
+    rgba(14, 14, 22, 0.9) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.35),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+}
+
+.orio-app .saas-card-hover:hover {
+  border-color: rgba(45, 212, 191, 0.25);
+  box-shadow: 0 16px 48px rgba(45, 212, 191, 0.08);
+}
+
+.orio-app .glass-card {
+  background: rgba(18, 18, 28, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.orio-app .input-field {
+  border-color: rgba(255, 255, 255, 0.12);
+  background-color: rgba(12, 12, 18, 0.6);
+  color: var(--orio-text);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.orio-app .input-field:focus {
+  border-color: rgba(45, 212, 191, 0.45);
+  --tw-ring-color: rgba(45, 212, 191, 0.25);
+}
+
+.orio-app .auth-input {
+  background-color: rgba(45, 212, 191, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--orio-text);
+}
+
+.orio-app .auth-input:focus {
+  border-color: rgba(45, 212, 191, 0.45);
+  --tw-ring-color: rgba(167, 139, 250, 0.25);
+}
+
+.orio-app .auth-btn-primary {
+  background: linear-gradient(135deg, #2dd4bf, #a78bfa, #e879f9);
+  background-size: 200% 200%;
+  box-shadow: 0 8px 28px rgba(45, 212, 191, 0.25);
+}
+
+.orio-app .auth-btn-primary:hover {
+  background: linear-gradient(135deg, #5eead4, #c4b5fd, #f0abfc);
+  box-shadow: 0 12px 36px rgba(167, 139, 250, 0.3);
+}
+
+.orio-app .btn-primary {
+  background: linear-gradient(135deg, #0d9488, #7c3aed);
+  color: #fff;
+}
+
+.orio-app .btn-primary:hover {
+  filter: brightness(1.06);
+}
+
+.orio-app .btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(45, 212, 191, 0.35);
+  color: var(--orio-text);
+}
+
+.orio-app .btn-secondary:hover {
+  background: rgba(45, 212, 191, 0.1);
+}
+
+/* Surfaces & neutrals (Tailwind utility remaps) */
+.orio-app .bg-white {
+  background-color: rgba(18, 18, 28, 0.92) !important;
+}
+
+.orio-app .bg-white\/80 {
+  background-color: rgba(18, 18, 28, 0.82) !important;
+}
+
+.orio-app .bg-white\/90 {
+  background-color: rgba(18, 18, 28, 0.9) !important;
+}
+
+.orio-app .bg-gray-50 {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.orio-app .bg-gray-50\/50 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.orio-app .bg-gray-50\/60 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.orio-app .bg-gray-100 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.orio-app .bg-slate-50 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.orio-app .bg-indigo-50 {
+  background-color: rgba(45, 212, 191, 0.09) !important;
+}
+
+.orio-app .bg-indigo-50\/60 {
+  background-color: rgba(45, 212, 191, 0.08) !important;
+}
+
+.orio-app .bg-indigo-100 {
+  background-color: rgba(99, 102, 241, 0.18) !important;
+}
+
+.orio-app .bg-violet-100 {
+  background-color: rgba(167, 139, 250, 0.16) !important;
+}
+
+.orio-app .bg-amber-50\/30 {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+}
+
+.orio-app .bg-amber-50\/40 {
+  background-color: rgba(245, 158, 11, 0.14) !important;
+}
+
+.orio-app .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+.orio-app .bg-red-100 {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+}
+
+.orio-app .border-gray-50 {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.orio-app .border-gray-100 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.orio-app .border-gray-200 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.orio-app .border-gray-300 {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.orio-app .border-indigo-100 {
+  border-color: rgba(99, 102, 241, 0.22) !important;
+}
+
+.orio-app .border-indigo-100\/55 {
+  border-color: rgba(99, 102, 241, 0.28) !important;
+}
+
+.orio-app .border-indigo-200 {
+  border-color: rgba(99, 102, 241, 0.35) !important;
+}
+
+.orio-app .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.orio-app .text-gray-900 {
+  color: var(--orio-text) !important;
+}
+
+.orio-app .text-gray-800 {
+  color: #e2e8f0 !important;
+}
+
+.orio-app .text-gray-700 {
+  color: #cbd5e1 !important;
+}
+
+.orio-app .text-gray-600 {
+  color: var(--orio-muted) !important;
+}
+
+.orio-app .text-gray-500 {
+  color: #8899aa !important;
+}
+
+.orio-app .text-gray-400 {
+  color: #7b8c9e !important;
+}
+
+.orio-app .text-indigo-600 {
+  color: #5eead4 !important;
+}
+
+.orio-app .text-indigo-700 {
+  color: #99f6e4 !important;
+}
+
+.orio-app .text-indigo-800 {
+  color: #ccfbf1 !important;
+}
+
+.orio-app .text-violet-800 {
+  color: #ddd6fe !important;
+}
+
+.orio-app .text-violet-900 {
+  color: #ede9fe !important;
+}
+
+.orio-app .placeholder\:text-gray-400::placeholder {
+  color: #64748b !important;
+}
+
+.orio-app .hover\:bg-gray-50:hover {
+  background-color: rgba(45, 212, 191, 0.07) !important;
+}
+
+.orio-app .hover\:bg-gray-100:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.orio-app .hover\:bg-indigo-100:hover {
+  background-color: rgba(45, 212, 191, 0.12) !important;
+}
+
+.orio-app .hover\:text-gray-700:hover {
+  color: #e2e8f0 !important;
+}
+
+.orio-app .hover\:text-gray-900:hover {
+  color: #f8fafc !important;
+}
+
+.orio-app .hover\:border-violet-500:hover {
+  border-color: rgba(167, 139, 250, 0.55) !important;
+}
+
+.orio-app .bg-gray-200 {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.orio-app .text-red-600 {
+  color: #f87171 !important;
+}
+
+.orio-app .text-red-700 {
+  color: #fca5a5 !important;
+}
+
+.orio-app .saas-btn-primary {
+  background: linear-gradient(135deg, #2dd4bf, #a78bfa, #e879f9);
+  background-size: 200% 200%;
+  box-shadow: 0 8px 28px rgba(45, 212, 191, 0.22);
+}
+
+.orio-app .saas-btn-primary:hover {
+  box-shadow: 0 12px 40px rgba(167, 139, 250, 0.28);
+}
+
+.orio-app .saas-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--orio-text);
+}
+
+.orio-app .saas-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(45, 212, 191, 0.3);
+}
+
+/* Readable fields: .orio-app remaps text-gray-900 → light; inputs need explicit contrast */
+.orio-app
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(
+        [type="file"]
+      ):not([type="image"]):not([type="button"]):not([type="submit"]):not(
+        [type="reset"]
+      ),
+    textarea,
+    select
+  ) {
+  color: #e2e8f0 !important;
+  background-color: rgba(10, 10, 16, 0.94) !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+.orio-app
+  :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not(
+        [type="file"]
+      ):not([type="image"]):not([type="button"]):not([type="submit"]):not(
+        [type="reset"]
+      ),
+    textarea
+  )::placeholder {
+  color: #64748b !important;
+  opacity: 1;
+}
+
+.orio-app select option {
+  background-color: #12121c;
+  color: #e2e8f0;
+}
+
+.orio-app input:-webkit-autofill,
+.orio-app input:-webkit-autofill:hover,
+.orio-app input:-webkit-autofill:focus,
+.orio-app textarea:-webkit-autofill,
+.orio-app textarea:-webkit-autofill:hover,
+.orio-app textarea:-webkit-autofill:focus {
+  -webkit-text-fill-color: #e2e8f0 !important;
+  caret-color: #e2e8f0;
+  box-shadow: 0 0 0 1000px rgba(10, 10, 16, 0.94) inset !important;
+  transition: background-color 9999s ease-out;
+}
+
+/* Info tooltips: in-app uses dark elevated surface; landing keeps light paper */
+.orio-app .orio-popover-paper {
+  background: linear-gradient(
+    165deg,
+    #1a1a24 0%,
+    #14141e 45%,
+    #12121c 100%
+  ) !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  --tw-ring-color: rgba(129, 140, 248, 0.18) !important;
+  box-shadow: 0 16px 48px -10px rgba(0, 0, 0, 0.55),
+    0 4px 18px rgba(0, 0, 0, 0.38) !important;
+}
+
+.orio-landing .orio-popover-paper {
+  background: linear-gradient(
+    165deg,
+    #ffffff 0%,
+    #f8fafc 50%,
+    #eef2ff 100%
+  ) !important;
+  color: #0f172a !important;
+  border-color: rgba(129, 140, 248, 0.35) !important;
+  --tw-ring-color: rgba(129, 140, 248, 0.25) !important;
+}
+
+/* FAQ: smooth panel when switching category (landing) */
+@keyframes orio-faq-panel-enter {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -183,9 +1639,55 @@ select {
   }
 }
 
+.orio-faq-answer-list {
+  animation: orio-faq-panel-enter 0.35s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+/* Landing: feature showcase preview swap */
+@keyframes orio-feature-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.orio-feature-preview-enter {
+  animation: orio-feature-fade 0.45s cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+/* Primary in-app scroll regions: smoother anchor / programmatic scroll + touch momentum */
+.orio-app-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .orio-app-scroll {
+    scroll-behavior: auto;
+  }
+
+  .orio-hero-mesh::before,
+  .orio-hero-mesh::after,
+  .orio-shimmer-text,
+  .orio-scan-line,
+  .orio-glow-ring::before,
+  .orio-btn-aurora,
+  .orio-card-drift {
+    animation: none !important;
+  }
+
+  .orio-reveal {
+    filter: none;
+    transform: none;
+    opacity: 1;
   }
 
   *,

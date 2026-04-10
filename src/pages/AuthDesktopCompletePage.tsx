@@ -22,26 +22,26 @@ export default function AuthDesktopCompletePage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#f5f6fa] flex items-center justify-center px-4">
+    <div className="flex min-h-dvh items-center justify-center orio-workspace-bg px-4 text-[var(--orio-text)]">
       <div className="w-full max-w-xl text-center">
-        <div className="flex items-center justify-center gap-2 text-2xl font-bold text-slate-900">
+        <div className="flex items-center justify-center gap-2 text-2xl font-bold tracking-tight text-[var(--orio-text)]">
           <span role="img" aria-label="Parakeet">
             🦜
           </span>
-          <span>OrioAI</span>
+          <span>Smeed AI</span>
         </div>
 
-        <div className="mx-auto mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-violet-100 text-violet-600">
+        <div className="mx-auto mt-8 flex h-16 w-16 items-center justify-center rounded-full bg-violet-500/15 text-violet-300 ring-1 ring-inset ring-violet-400/30">
           <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
 
-        <h1 className="mt-6 text-3xl font-semibold text-slate-900">Authentication Successful</h1>
-        <p className="mt-2 text-slate-600">Welcome back, {safeFirstName}!</p>
+        <h1 className="mt-6 text-3xl font-semibold text-[var(--orio-text)]">Authentication Successful</h1>
+        <p className="mt-2 text-lg text-[var(--orio-teal)]">Welcome back, {safeFirstName}!</p>
 
-        <p className="mt-8 text-sm text-slate-700">
-          Click &quot;Open OrioAI&quot; in the dialog shown by your browser. If you don&apos;t see the dialog, click
+        <p className="mt-8 text-sm leading-relaxed text-[var(--orio-muted)]">
+          Click &quot;Open Smeed AI&quot; in the dialog shown by your browser. If you don&apos;t see the dialog, click
           &quot;Open in Desktop App&quot; below.
         </p>
 
@@ -49,21 +49,21 @@ export default function AuthDesktopCompletePage() {
           <button
             type="button"
             onClick={openDesktopApp}
-            className="inline-flex items-center justify-center rounded-md bg-[#111a3a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1b2957]"
+            className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-gradient-to-r from-teal-600 via-teal-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-950/40 transition hover:from-teal-500 hover:via-teal-500 hover:to-indigo-500"
           >
             Open in Desktop App
           </button>
         </div>
 
-        <p className="mt-6 text-xs text-slate-500">
+        <p className="mt-6 text-xs leading-relaxed text-[var(--orio-muted)]">
           Your desktop app has finished signing in. You can close this tab after you return to the app.
         </p>
 
-        <div className="mt-10 border-t border-slate-200 pt-6">
+        <div className="mt-10 border-t border-white/10 pt-6">
           <button
             type="button"
             onClick={() => navigate('/dashboard')}
-            className="inline-flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-slate-900"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[var(--orio-muted)] transition-colors hover:text-[var(--orio-text)]"
           >
             <span aria-hidden>←</span>
             Back to Dashboard

@@ -6,6 +6,7 @@ interface AuthState {
   token: string | null
   isAuthenticated: boolean
   setAuth: (user: UserDto, token: string) => void
+  setUser: (user: UserDto) => void
   logout: () => void
 }
 
@@ -68,6 +69,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.setItem(STORAGE_USER, JSON.stringify(user))
     set({ user, token, isAuthenticated: true })
     scheduleAutoLogout(token)
+  },
+  setUser: (user) => {
+    const token = useAuthStore.getState().token
+    if (!token) return
+    localStorage.setItem(STORAGE_USER, JSON.stringify(user))
+    set({ user, isAuthenticated: true })
   },
   logout: () => {
     clearTokenExpiryTimer()

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 const toolRows = [
-  { name: "Orio AI", price: "₹1,199", note: "Best overall value", highlight: true },
+  { name: "Smeed AI", price: "₹1,199", note: "Best overall value", highlight: true },
   { name: "Parakeet AI", price: "₹2,650", note: "Higher pricing" },
   { name: "Final Round AI", price: "₹8,188", note: "Premium tier" },
   { name: "LockedIn AI", price: "₹6,213", note: "Subscription-heavy" },
@@ -20,11 +20,11 @@ const featureRows = [
 const faqs = [
   {
     q: "Which is the most affordable AI interview assistant?",
-    a: "Orio AI is one of the most budget-friendly options while still offering real-time assistance and structured interview support.",
+    a: "Smeed AI is one of the most budget-friendly options while still offering real-time assistance and structured interview support.",
   },
   {
-    q: "Can I use Orio AI in live interviews?",
-    a: "Yes. Orio AI is designed for real-time interview scenarios and works with common interview platforms.",
+    q: "Can I use Smeed AI in live interviews?",
+    a: "Yes. Smeed AI is designed for real-time interview scenarios and works with common interview platforms.",
   },
   {
     q: "Is there a free option?",
@@ -32,7 +32,7 @@ const faqs = [
   },
   {
     q: "How is this different from simple practice tools?",
-    a: "Practice tools simulate questions. Orio AI additionally helps during live conversation flow and follow-up response framing.",
+    a: "Practice tools simulate questions. Smeed AI additionally helps during live conversation flow and follow-up response framing.",
   },
 ];
 
@@ -46,7 +46,7 @@ function cell(ok: boolean) {
 
 export default function AffordableInterviewAssistantsPage() {
   return (
-    <div className="min-h-screen bg-[#F9FAFB] text-gray-900">
+    <div className="min-h-dvh orio-workspace-bg text-gray-900">
       <section className="py-12 md:py-16">
         <div className="saas-container max-w-5xl">
           <h1 className="text-3xl md:text-4xl font-bold text-center">
@@ -58,7 +58,7 @@ export default function AffordableInterviewAssistantsPage() {
           </p>
           <div className="mt-5 flex items-center justify-center gap-3">
             <Link to="/signup" className="saas-btn-primary">
-              Start with Orio AI
+              Start with Smeed AI
             </Link>
             <Link to="/#pricing" className="saas-btn-secondary">
               View Plans
@@ -121,7 +121,7 @@ export default function AffordableInterviewAssistantsPage() {
               <thead>
                 <tr className="text-left text-gray-500 border-b border-gray-200">
                   <th className="py-2 pr-3">Feature</th>
-                  <th className="py-2 pr-3">Orio AI</th>
+                  <th className="py-2 pr-3">Smeed AI</th>
                   <th className="py-2 pr-3">Parakeet</th>
                   <th className="py-2 pr-3">Final Round</th>
                   <th className="py-2 pr-3">LockedIn</th>
@@ -234,11 +234,11 @@ export default function AffordableInterviewAssistantsPage() {
               Ready to Start with the Best Affordable Option?
             </h2>
             <p className="mt-3 text-gray-600">
-              Join Orio AI and practice interviews with clarity, confidence, and better value.
+              Join Smeed AI and practice interviews with clarity, confidence, and better value.
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-3">
               <Link to="/signup" className="saas-btn-primary">
-                Start with Orio AI
+                Start with Smeed AI
               </Link>
               <Link to="/" className="saas-btn-secondary">
                 Back to Home

@@ -28,6 +28,8 @@ export type VerifyStripeSessionResult = {
   paid: boolean;
   productId?: string;
   sessionId?: string;
+  creditsApplied?: number;
+  creditsBalance?: number;
 };
 
 export async function verifyStripeCheckoutSession(

@@ -4,7 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { CheckoutProduct } from "../billing/plans";
 import { processDummyPayment } from "../billing/dummyPaymentGateway";
-import { useBillingStore } from "../store/billingStore";
+import { formatCreditsDisplay, useBillingStore } from "../store/billingStore";
+import { useNotificationsStore } from "../store/notificationsStore";
 import {
   createStripeCheckoutSession,
   fetchStripeCheckoutOptions,
@@ -108,6 +109,34 @@ export function PaymentCheckoutModal({
     applySuccessfulPurchase(product);
     setTxId(result.transactionId);
     setStep("success");
+
+    const add = useNotificationsStore.getState().add;
+    const creditsNow = useBillingStore.getState().credits;
+    if (product.kind === "credits_pack") {
+      add({
+        kind: "billing",
+        title: "Credits added",
+        body: `Your balance is now ${formatCreditsDisplay(creditsNow)} call credits.`,
+        href: "/dashboard/call-sessions",
+        dedupeKey: `billing-credits-${result.transactionId}`,
+      });
+    } else if (product.kind === "subscription") {
+      add({
+        kind: "billing",
+        title: "Subscription active",
+        body: `Unlimited calls are now on for your ${product.planShortLabel ?? "subscription"} plan.`,
+        href: "/dashboard/profile",
+        dedupeKey: `billing-sub-${result.transactionId}`,
+      });
+    } else if (product.kind === "lifetime") {
+      add({
+        kind: "billing",
+        title: "Lifetime access unlocked",
+        body: "You have unlimited calls for the lifetime of your account.",
+        href: "/dashboard/profile",
+        dedupeKey: `billing-life-${result.transactionId}`,
+      });
+    }
   };
 
   const handleStripeCheckout = async () => {

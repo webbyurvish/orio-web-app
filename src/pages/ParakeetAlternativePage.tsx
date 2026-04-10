@@ -20,40 +20,40 @@ const reasons = [
 
 const faqs = [
   {
-    q: "Is Orio AI cheaper than Parakeet AI?",
-    a: "Yes, Orio AI is positioned as a significantly more affordable option for candidates who still want core interview assistance features.",
+    q: "Is Smeed AI cheaper than Parakeet AI?",
+    a: "Yes, Smeed AI is positioned as a significantly more affordable option for candidates who still want core interview assistance features.",
   },
   {
-    q: "Can I switch from Parakeet AI to Orio AI easily?",
-    a: "Yes. You can start using Orio AI immediately and continue interview prep with no complicated setup.",
+    q: "Can I switch from Parakeet AI to Smeed AI easily?",
+    a: "Yes. You can start using Smeed AI immediately and continue interview prep with no complicated setup.",
   },
   {
-    q: "Why is Orio AI cost-effective?",
-    a: "Orio AI focuses on practical interview features and streamlined product design, which keeps plans budget-friendly.",
+    q: "Why is Smeed AI cost-effective?",
+    a: "Smeed AI focuses on practical interview features and streamlined product design, which keeps plans budget-friendly.",
   },
   {
-    q: "Does Orio AI include live interview support?",
-    a: "Yes, Orio AI supports real-time interview workflows, including structured and natural answer styles.",
+    q: "Does Smeed AI include live interview support?",
+    a: "Yes, Smeed AI supports real-time interview workflows, including structured and natural answer styles.",
   },
 ];
 
 export default function ParakeetAlternativePage() {
   return (
-    <div className="min-h-screen bg-[#F9FAFB] text-gray-900">
+    <div className="min-h-dvh orio-workspace-bg text-gray-900">
       <section className="py-10">
         <div className="saas-container max-w-5xl">
           <p className="text-sm text-gray-500">
             Home / Alternatives / Parakeet AI
           </p>
           <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
-            🏆 Orio AI is an affordable and practical alternative for interview prep.
+            🏆 Smeed AI is an affordable and practical alternative for interview prep.
           </div>
           <h1 className="mt-5 text-3xl md:text-4xl font-bold">
             Parakeet AI Alternative: <span className="text-amber-600">Save 55%</span>{" "}
-            with Orio AI
+            with Smeed AI
           </h1>
           <p className="mt-3 text-gray-600 max-w-3xl">
-            Compare Orio AI and Parakeet AI side by side across pricing, interview
+            Compare Smeed AI and Parakeet AI side by side across pricing, interview
             support, and practical usability.
           </p>
           <div className="mt-5 grid sm:grid-cols-3 gap-3">
@@ -77,13 +77,13 @@ export default function ParakeetAlternativePage() {
         <div className="saas-container max-w-5xl">
           <div className="saas-card overflow-x-auto">
             <h2 className="text-xl font-semibold">
-              Parakeet AI vs Orio AI: Detailed Comparison
+              Parakeet AI vs Smeed AI: Detailed Comparison
             </h2>
             <table className="w-full mt-4 text-sm min-w-[680px]">
               <thead>
                 <tr className="border-b border-gray-200 text-gray-500 text-left">
                   <th className="py-2 pr-3">Feature</th>
-                  <th className="py-2 pr-3">Orio AI</th>
+                  <th className="py-2 pr-3">Smeed AI</th>
                   <th className="py-2">Parakeet AI</th>
                 </tr>
               </thead>
@@ -105,7 +105,7 @@ export default function ParakeetAlternativePage() {
         <div className="saas-container max-w-5xl">
           <div className="saas-card">
             <h2 className="text-2xl font-bold">
-              Why is Orio AI more affordable than Parakeet AI?
+              Why is Smeed AI more affordable than Parakeet AI?
             </h2>
             <ul className="mt-4 space-y-2 text-gray-700">
               {reasons.map((r) => (
@@ -130,7 +130,7 @@ export default function ParakeetAlternativePage() {
             <div className="saas-card">
               <p className="text-amber-500">★★★★★</p>
               <p className="mt-2 text-sm text-gray-700">
-                “Orio AI felt more practical during live interview simulations.”
+                “Smeed AI felt more practical during live interview simulations.”
               </p>
               <p className="mt-2 text-xs text-gray-500">— Backend Engineer</p>
             </div>
@@ -157,9 +157,9 @@ export default function ParakeetAlternativePage() {
           <h2 className="text-2xl font-bold">Compare Other AI Interview Assistants</h2>
           <div className="mt-4 grid md:grid-cols-3 gap-4">
             {[
-              "Orio AI vs Final Round AI",
-              "Orio AI vs LockedIn AI",
-              "Orio AI vs Interview Warmup",
+              "Smeed AI vs Final Round AI",
+              "Smeed AI vs LockedIn AI",
+              "Smeed AI vs Interview Warmup",
             ].map((title) => (
               <div key={title} className="saas-card">
                 <p className="font-semibold">{title}</p>
@@ -177,11 +177,11 @@ export default function ParakeetAlternativePage() {
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center">
             <h2 className="text-2xl font-bold">Ready to Save on Interview Assistance?</h2>
             <p className="mt-3 text-gray-600">
-              Start with Orio AI and prepare with confidence at a better price.
+              Start with Smeed AI and prepare with confidence at a better price.
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-3">
               <Link to="/signup" className="saas-btn-primary">
-                Start with Orio AI
+                Start with Smeed AI
               </Link>
               <Link to="/affordable-interview-assistants" className="saas-btn-secondary">
                 Try Free Plan

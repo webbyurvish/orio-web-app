@@ -44,15 +44,26 @@ export interface CallSessionMessageDto {
   createdAt: string
 }
 
+export interface AiNotesDto {
+  notes?: string | null
+  updatedAt?: string | null
+}
+
 export interface AddCallSessionMessageRequest {
   role?: string
   content?: string
 }
 
+export type CallSessionsListView = 'all' | 'live' | 'ended'
+
 export const callSessionsApi = {
-  list: async (page = 1, pageSize = 10): Promise<PagedResult<CallSessionDto>> => {
+  list: async (
+    page = 1,
+    pageSize = 10,
+    view: CallSessionsListView = 'all',
+  ): Promise<PagedResult<CallSessionDto>> => {
     const res = await apiClient.get<PagedResult<CallSessionDto>>('/callsessions', {
-      params: { page, pageSize },
+      params: { page, pageSize, view },
     })
     return res.data
   },
@@ -67,8 +78,42 @@ export const callSessionsApi = {
     return res.data
   },
 
+  delete: async (id: string): Promise<void> => {
+    await apiClient.delete(`/callsessions/${id}`)
+  },
+
+  get: async (sessionId: string): Promise<CallSessionDto> => {
+    const res = await apiClient.get<CallSessionDto>(`/callsessions/${sessionId}`)
+    return res.data
+  },
+
   getMessages: async (sessionId: string): Promise<CallSessionMessageDto[]> => {
     const res = await apiClient.get<CallSessionMessageDto[]>(`/callsessions/${sessionId}/messages`)
+    return res.data
+  },
+
+  activate: async (sessionId: string): Promise<CallSessionDto> => {
+    const res = await apiClient.post<CallSessionDto>(`/callsessions/${sessionId}/activate`)
+    return res.data
+  },
+
+  end: async (sessionId: string): Promise<CallSessionDto> => {
+    const res = await apiClient.post<CallSessionDto>(`/callsessions/${sessionId}/end`)
+    return res.data
+  },
+
+  incrementAiUsage: async (sessionId: string): Promise<CallSessionDto> => {
+    const res = await apiClient.post<CallSessionDto>(`/callsessions/${sessionId}/ai-usage`)
+    return res.data
+  },
+
+  getAiNotes: async (sessionId: string): Promise<AiNotesDto> => {
+    const res = await apiClient.get<AiNotesDto>(`/callsessions/${sessionId}/ai-notes`)
+    return res.data
+  },
+
+  generateAiNotes: async (sessionId: string): Promise<AiNotesDto> => {
+    const res = await apiClient.post<AiNotesDto>(`/callsessions/${sessionId}/ai-notes/generate`)
     return res.data
   },
 

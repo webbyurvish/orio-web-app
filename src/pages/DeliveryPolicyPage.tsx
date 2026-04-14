@@ -199,7 +199,7 @@ export default function DeliveryPolicyPage() {
                     <li>Check our system status at www.chiku-ai.in</li>
                     <li>Verify your internet connection</li>
                     <li>Clear your browser cache and cookies</li>
-                    <li>Contact support at support@chiku-ai.in</li>
+                    <li>Contact support at support@smeedai.com</li>
                     <li>
                       Include your account email and description of the issue
                     </li>
@@ -257,7 +257,7 @@ export default function DeliveryPolicyPage() {
                         <span className="font-semibold text-gray-900">
                           Email:
                         </span>{" "}
-                        support@chiku-ai.in
+                        support@smeedai.com
                       </p>
                       <p>
                         <span className="font-semibold text-gray-900">

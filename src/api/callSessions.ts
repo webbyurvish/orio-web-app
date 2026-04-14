@@ -7,6 +7,7 @@ export interface CallSessionDto {
   resumeId?: string | null
   language: string
   simpleLanguage: boolean
+  naturalSpeakingMode?: boolean
   extraContext?: string | null
   aiModel: string
   saveTranscript: boolean
@@ -24,6 +25,7 @@ export interface CreateCallSessionRequest {
   resumeId?: string
   language?: string
   simpleLanguage?: boolean
+  naturalSpeakingMode?: boolean
   extraContext?: string
   aiModel?: string
   saveTranscript?: boolean

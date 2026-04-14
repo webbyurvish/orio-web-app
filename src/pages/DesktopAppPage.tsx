@@ -2,8 +2,12 @@
  * Dashboard > Desktop App — download hero + live-mode UI mockup (replace mockup with image/video later).
  */
 
-const WINDOWS_INSTALLER_URL =
-  "https://github.com/webbyurvish/orio-desktop-app/releases/latest/download/orio-desktop-setup.exe";
+import { useState } from "react";
+import {
+  DesktopSmartScreenHelpModal,
+  triggerWindowsInstallerDownload,
+} from "../components/DesktopSmartScreenHelpModal";
+import { WINDOWS_DESKTOP_INSTALLER_URL } from "../constants/desktopWindowsInstaller";
 
 // macOS build is not published yet (CTA shows "coming soon").
 
@@ -155,6 +159,13 @@ function DesktopLiveModeMockup() {
 }
 
 export function DashboardDesktopAppContent() {
+  const [smartScreenHelpOpen, setSmartScreenHelpOpen] = useState(false);
+
+  const handleWindowsDownload = () => {
+    triggerWindowsInstallerDownload(WINDOWS_DESKTOP_INSTALLER_URL);
+    setSmartScreenHelpOpen(true);
+  };
+
   return (
     <div className="mx-auto w-full max-w-3xl px-4 pb-12 pt-4 sm:px-6 md:pt-6">
       {/* Hero card */}
@@ -170,15 +181,14 @@ export function DashboardDesktopAppContent() {
           screen share.
         </p>
         <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
-          <a
-            href={WINDOWS_INSTALLER_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={handleWindowsDownload}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 via-violet-500 to-fuchsia-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 transition hover:brightness-110"
           >
             <IconWindows />
             Download for Windows
-          </a>
+          </button>
           <button
             type="button"
             disabled
@@ -201,6 +211,8 @@ export function DashboardDesktopAppContent() {
         </p>
         <DesktopLiveModeMockup />
       </div>
+
+      <DesktopSmartScreenHelpModal open={smartScreenHelpOpen} onClose={() => setSmartScreenHelpOpen(false)} />
     </div>
   );
 }

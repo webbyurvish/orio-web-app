@@ -157,7 +157,7 @@ export default function TermsAndConditionsPage() {
                   </p>
                   <div className="mt-4 rounded-xl bg-gray-50 border border-gray-200 px-5 py-4 text-sm text-gray-700">
                     <p>
-                      <span className="font-semibold text-gray-900">Email:</span> support@chiku-ai.in
+                      <span className="font-semibold text-gray-900">Email:</span> support@smeedai.com
                     </p>
                     <p className="mt-1">
                       <span className="font-semibold text-gray-900">Website:</span> www.chiku-ai.in

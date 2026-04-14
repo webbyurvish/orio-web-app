@@ -37,7 +37,7 @@ export default function ContactUsPage() {
     }
 
     // No backend wiring requested; submit via mailto for now.
-    const to = "support@orio-ai.in";
+    const to = "support@smeedai.com";
     const mailSubject = `[Contact] ${subject.trim()}`;
     const body = [
       `Full Name: ${fullName.trim()}`,
@@ -89,7 +89,7 @@ export default function ContactUsPage() {
                   <div>
                     <p className="text-xs text-gray-500">Email</p>
                     <p className="text-sm font-semibold text-gray-900">
-                      support@orio-ai.in
+                      support@smeedai.com
                     </p>
                   </div>
                 </div>
@@ -254,7 +254,14 @@ export default function ContactUsPage() {
             >
               <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5zm8.95 1.35a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4z" />
             </svg>
-            <span>@chikuai.official</span>
+            <a
+              href="https://www.instagram.com/smeedai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-gray-700 hover:text-indigo-600 hover:underline"
+            >
+              @smeedai
+            </a>
           </div>
           <div className="mt-2">
             Smeed AI is a trademark of Smeed AI.

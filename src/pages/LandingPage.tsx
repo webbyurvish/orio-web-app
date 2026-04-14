@@ -6,7 +6,6 @@ import { AZURE_SPEECH_STT_LOCALES } from "../constants/azureSpeechSttLocales";
 import { LazyMountWhenVisible } from "../components/LazyMountWhenVisible";
 import { RevealOnScroll } from "../components/RevealOnScroll";
 import { CustomerVoicesSection } from "../components/CustomerVoicesSection";
-import { WhyOrioComparisonSection } from "../components/WhyOrioComparisonSection";
 import { CompetitorPriceShowdownSection } from "../components/CompetitorPriceShowdownSection";
 import { LandingFeatureShowcase } from "../components/LandingFeatureShowcase";
 import {
@@ -29,7 +28,8 @@ const STATIC_LANDING_DATA = {
     HeroCtaSecondary: "See Features",
     HeroCtaSecondaryUrl: "#features",
     FeatureIntroTitle: "Stop Wasting Time Preparing",
-    FeatureIntroSubtitle: "Tap a feature to preview how it looks in the app — built for real interviews.",
+    FeatureIntroSubtitle:
+      "Live assistance, smart context, and fast answers in one workspace — tap any feature to preview.",
     FeatureIntroBody:
       "Smeed AI helps you practice with realistic questions, live guidance, and focused feedback so you can perform better in real interviews.",
     HowItHelpsTitle: "Everything in one interview workspace",
@@ -63,6 +63,17 @@ function c(key: string, data: typeof STATIC_LANDING_DATA) {
   return data.content[key] ?? key;
 }
 
+/** Logged-in users go to dashboard checkout; guests continue to signup. */
+function planPurchasePath(
+  isAuthenticated: boolean,
+  tab: "credits" | "subscription" | "lifetime",
+  checkoutProductId: string,
+) {
+  if (!isAuthenticated) return "/signup";
+  const q = new URLSearchParams({ tab, openCheckout: checkoutProductId });
+  return `/dashboard/buyCredits?${q.toString()}`;
+}
+
 export default function LandingPage() {
   const data = STATIC_LANDING_DATA;
   const [desiTab, setDesiTab] = useState<"behavioral" | "technical">("behavioral");
@@ -70,33 +81,100 @@ export default function LandingPage() {
 
   const faqByCategory = {
     privacy: [
-      { q: "Which platforms does Smeed AI work with?", a: "Smeed AI works with common interview platforms including Zoom, Google Meet, and Microsoft Teams." },
-      { q: "Is Smeed AI visible when I share my screen?", a: "Smeed AI is designed to be lightweight and practical. Use it according to your interview policy and company guidelines." },
-      { q: "Can proctoring software detect Smeed AI?", a: "Different systems behave differently. Always follow exam/interview rules and allowed tool policies." },
-      { q: "Can I use Smeed AI during an online exam?", a: "Use only where permitted. For exams or assessments, always follow the official instructions." },
-      { q: "Can I rename the process in Task Manager?", a: "No, Smeed AI keeps standard app behavior and does not provide process masking features." },
+      {
+        q: "Which platforms does Smeed AI work with?",
+        a: "Smeed AI works with all call platforms and is designed to be private and discreet. Make sure you're running the latest versions of your OS and video calling software, and always test Smeed AI in a safe environment before your actual call.",
+      },
+      {
+        q: "Is Smeed AI visible when I share my screen?",
+        a: 'If you\'re using Zoom, update it to the latest version and enable "Advanced capture with window filtering" in your Zoom settings. This ensures Smeed AI stays hidden during screen sharing.\n\nOn other platforms, it is completely invisible and undetectable. 🔒',
+      },
+      {
+        q: "Can proctoring software detect Smeed AI?",
+        a: "No. Smeed AI operates invisibly at the system level and is designed to be undetectable by proctoring software, screen-sharing tools, and recording software.",
+      },
+      {
+        q: "Can I use Smeed AI during an online exam?",
+        a: "Yes. Smeed AI is invisible and undetectable to the proctoring and screen-sharing tools typically used during online exams.",
+      },
+      {
+        q: "Is there a way to change the Smeed AI process name in Activity Monitor or Task Manager?",
+        a: "Unfortunately, there is currently no way to change the Smeed AI process name in Activity Monitor or Task Manager.",
+      },
     ],
     features: [
-      { q: "What languages does Smeed AI support?", a: "Smeed AI matches your interview language to Azure Speech transcription and Azure OpenAI answers. The exact locales you can choose are the ones shown under Interview in Your Language and in the session setup dropdown." },
-      { q: "Can Smeed AI listen in one language and respond in another?", a: "Yes, you can guide response style and language preference in your session context." },
-      { q: "Does Smeed AI have keyboard shortcuts?", a: "Yes, core actions are optimized for quick interaction and minimal switching overhead." },
-      { q: "Does Smeed AI support coding calls?", a: "Yes. It is designed for both behavioral and technical interview rounds." },
-      { q: "Can I use headphones during the call?", a: "Yes, headphones are supported and often recommended for cleaner audio input." },
-      { q: "Can I provide extra context during the call?", a: "Yes, you can add role and interview context to tailor answer quality." },
-      { q: "Can I use Smeed AI for a phone call?", a: "Yes, if your setup captures audio input/output correctly." },
-      { q: "Does Smeed AI have a mobile app?", a: "Currently, the primary experience is web + desktop-focused." },
+      {
+        q: "What languages does Smeed AI support?",
+        a: "You can view all supported languages by starting a session and clicking the language dropdown. Smeed AI listens for one language at a time — if you switch languages during your call, update the session language to match.",
+      },
+      {
+        q: "Can Smeed AI listen in one language and respond in another?",
+        a: "No. Smeed AI always responds in the same language it is listening in. The transcription and response language cannot be set independently.",
+      },
+      {
+        q: "Does Smeed AI have keyboard shortcuts?",
+        a: "Yes, Smeed AI offers shortcuts for most functions you'd use during a call. Hover over any button to see its shortcut. If no shortcut appears on hover, that button does not support shortcuts.",
+      },
+      {
+        q: "Does Smeed AI support coding calls?",
+        a: "Yes. Smeed AI offers full coding call support, including code suggestions and explanations.",
+      },
+      {
+        q: "Can I use headphones during the call?",
+        a: "Yes. Smeed AI listens directly to system audio, not the sound coming from your speakers, so headphones work perfectly.",
+      },
+      {
+        q: "Can I provide extra context to Smeed AI during the call?",
+        a: 'Yes. Smeed AI uses the text you add to the "Extra Context/Instructions" field when creating a session. This allows you to provide guidance, key points, or specific instructions so the AI can respond more accurately during your call.',
+      },
+      {
+        q: "Does Smeed AI have a mobile app?",
+        a: "Not yet — Smeed AI does not have a mobile app today. We plan to launch one in the future. For now, use the web dashboard and desktop app for the full experience.",
+      },
     ],
     billing: [
-      { q: "How do I try Smeed AI for free?", a: "Start from the free plan and explore core features before upgrading." },
-      { q: "How does the credit system work?", a: "Credits are consumed based on usage/session type and plan configuration." },
-      { q: "How do I know how many credits I have left?", a: "Your remaining credits are visible in dashboard account sections." },
-      { q: "Does Smeed AI offer a referral program?", a: "Referral programs may vary over time; check current offers in product updates." },
-      { q: "What payment methods do you accept?", a: "Standard online payment methods are supported based on region availability." },
-      { q: "Can I split a payment across multiple cards?", a: "At present, split-card support is not guaranteed across all payment gateways." },
-      { q: "How do I manage payment information?", a: "You can manage billing details from your account billing settings." },
+      {
+        q: "How do I try Smeed AI for free?",
+        a: "Smeed AI offers unlimited free trial sessions lasting up to 10 minutes each. You can start a new free trial from the dashboard or the desktop app every 15 minutes.",
+      },
+      {
+        q: "How does the credit system work?",
+        a: "Credits are divided into 30-minute sessions. Starting a session deducts 0.5 credits and lasts 30 minutes. One minute before the session ends, it automatically extends for another 30 minutes and deducts another 0.5 credits. Credits never expire. Subscriptions and lifetime plans are also available for unlimited usage.",
+      },
+      {
+        q: "How do I know how many credits I have left?",
+        a: 'Your remaining credits are displayed in the "Call Credits" card on the bottom-left side of the screen.',
+      },
+      {
+        q: "Does Smeed AI offer a referral program?",
+        a: "Yes. After your first purchase, you'll receive a referral code to share. When someone uses your code at checkout, they receive 1 free credit and you receive 2 free credits. Only first-time buyers can use a referral code. If you're eligible for a discount or promotional code, you'll see an option to enter it at checkout.",
+      },
+      {
+        q: "What payment methods do you accept?",
+        a: "We support all major debit and credit cards, as well as Apple Pay and Google Pay. For customers in India, we also support UPI.",
+      },
+      {
+        q: "Can I split a payment across multiple cards?",
+        a: "No, payments cannot be split across multiple cards.",
+      },
+      {
+        q: "How do I manage or delete my payment information?",
+        a: 'Go to your profile page by clicking your email in the bottom-left corner of the dashboard, then click the "Billing" button in the top-right corner to manage your payment details.',
+      },
+      {
+        q: "Where can I find my invoices?",
+        a: 'Go to your profile page by clicking your email in the bottom-left corner of the dashboard, then click the "Billing" button in the top-right corner to view all payment invoices.',
+      },
+      {
+        q: "What is your refund policy?",
+        a: "We offer a 30-day money-back guarantee on all purchases. If you're unsatisfied for any reason, you can request a full refund within 30 days of your initial purchase. The guarantee applies to a single refund per user — subsequent purchases are not eligible.",
+      },
     ],
     account: [
-      { q: "My login link expired. How do I get a new one?", a: "Request a fresh login link from the sign-in flow and retry immediately." },
+      {
+        q: "My login link has expired. How do I get a new one?",
+        a: "Simply visit the website and log in again to receive a new login link.",
+      },
     ],
   } as const;
 
@@ -131,8 +209,8 @@ export default function LandingPage() {
   const tryForFreeRoute = isAuthenticated ? "/dashboard" : "/login";
 
   const socialHandles = [
-    { name: "Instagram", url: "https://instagram.com/orioai.official", icon: "instagram" },
-    { name: "X", url: "https://x.com/orioai", icon: "x" },
+    { name: "Instagram", url: "https://www.instagram.com/smeedai", icon: "instagram" },
+    { name: "X", url: "https://x.com/smeedai", icon: "x" },
     { name: "LinkedIn", url: "https://linkedin.com/company/orioai", icon: "linkedin" },
     { name: "YouTube", url: "https://youtube.com/@orioai", icon: "youtube" },
   ] as const;
@@ -156,6 +234,7 @@ export default function LandingPage() {
           detail: "3 Call Credits",
           cta: "Get Started",
           highlighted: false,
+          checkoutProductId: "credits_basic",
         },
         {
           name: "Plus",
@@ -167,6 +246,7 @@ export default function LandingPage() {
           detail: "6 Call Credits + 2 Free",
           cta: "Get Credits",
           highlighted: false,
+          checkoutProductId: "credits_plus",
         },
         {
           name: "Pro",
@@ -180,6 +260,7 @@ export default function LandingPage() {
           subtext: "Most chosen by serious candidates",
           priceWasInr: "3,499",
           priceWasUsd: "38.88",
+          checkoutProductId: "credits_pro",
         },
       ],
     },
@@ -201,6 +282,7 @@ export default function LandingPage() {
           detail: "Unlimited Calls",
           cta: "Subscribe",
           highlighted: false,
+          checkoutProductId: "sub_monthly",
         },
         {
           name: "Yearly",
@@ -214,6 +296,7 @@ export default function LandingPage() {
           subtext: "Recommended for serious job seekers",
           priceWasInr: "16,999",
           priceWasUsd: "188.88",
+          checkoutProductId: "sub_yearly",
         },
       ],
     },
@@ -236,6 +319,7 @@ export default function LandingPage() {
           cta: "Get Lifetime",
           highlighted: true,
           badge: "Limited Time Offer",
+          checkoutProductId: "lifetime",
         },
       ],
     },
@@ -553,11 +637,6 @@ export default function LandingPage() {
                       </div>
                     </div>
                   </div>
-
-                  <p className="mt-8 text-center text-xs text-slate-600">
-                    Toggle Behavioral vs Technical to see how tone adapts to the
-                    round.
-                  </p>
                 </div>
               </div>
             </div>
@@ -589,8 +668,6 @@ export default function LandingPage() {
           </div>
         </section>
       </RevealOnScroll>
-
-      <WhyOrioComparisonSection />
 
       {/* Interactive feature showcase (replaces bento "How it helps") */}
       <RevealOnScroll>
@@ -692,7 +769,11 @@ export default function LandingPage() {
                       <div className="flex-1" aria-hidden />
                     </div>
                     <Link
-                      to="/signup"
+                      to={planPurchasePath(
+                        isAuthenticated,
+                        pricingTab,
+                        plan.checkoutProductId,
+                      )}
                       className={`mt-6 flex w-full shrink-0 items-center justify-center rounded-full py-3 text-sm font-bold transition-all duration-300 ${
                         plan.highlighted ? "orio-btn-aurora" : "orio-btn-ghost border-teal-400/20"
                       }`}
@@ -756,21 +837,23 @@ export default function LandingPage() {
                     <button
                       type="button"
                       onClick={() => setOpenFaqIndex(open ? null : idx)}
-                      className="flex w-full items-start gap-4 px-5 py-4 text-left"
+                      className="grid w-full grid-cols-[2rem_1fr] gap-x-4 gap-y-0 px-5 py-4 text-left"
                     >
-                      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500/20 to-violet-600/20 text-xs font-bold text-teal-300">
+                      <span className="col-start-1 row-start-1 flex h-8 w-8 shrink-0 items-center justify-center self-center rounded-lg bg-gradient-to-br from-teal-500/20 to-violet-600/20 text-xs font-bold text-teal-300">
                         {open ? "−" : "+"}
                       </span>
-                      <span className="flex-1">
-                        <span className="block font-semibold text-white">{item.q}</span>
+                      <span className="col-start-2 row-start-1 min-w-0 self-center text-left font-semibold leading-snug text-white">
+                        {item.q}
+                      </span>
+                      <div className="col-start-2 row-start-2 min-w-0">
                         <div
                           className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
                         >
                           <div className="min-h-0 overflow-hidden">
-                            <p className="pt-3 text-sm leading-relaxed text-slate-400">{item.a}</p>
+                            <p className="whitespace-pre-line pt-3 text-sm leading-relaxed text-slate-400">{item.a}</p>
                           </div>
                         </div>
-                      </span>
+                      </div>
                     </button>
                   </div>
                 );

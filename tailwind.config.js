@@ -3,6 +3,26 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      keyframes: {
+        'orio-showdown-cta-glow': {
+          '0%, 100%': {
+            boxShadow:
+              '0 0 0 1px rgba(45, 212, 191, 0.35), 0 0 24px rgba(45, 212, 191, 0.2)',
+          },
+          '50%': {
+            boxShadow:
+              '0 0 0 1px rgba(45, 212, 191, 0.55), 0 0 36px rgba(45, 212, 191, 0.38), 0 0 56px rgba(167, 139, 250, 0.12)',
+          },
+        },
+        'orio-showdown-hero-ring': {
+          '0%, 100%': { opacity: '0.85' },
+          '50%': { opacity: '1' },
+        },
+      },
+      animation: {
+        'orio-showdown-cta-glow': 'orio-showdown-cta-glow 2.8s ease-in-out infinite',
+        'orio-showdown-hero-ring': 'orio-showdown-hero-ring 3.5s ease-in-out infinite',
+      },
       colors: {
         primary: {
           50: '#f3f5ff',

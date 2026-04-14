@@ -38,7 +38,7 @@ export default function LandingNavbar({
             ),
           },
           {
-            href: "/#compare",
+            href: "/#pricing-showdown",
             label: "Compare",
             icon: (
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -63,15 +63,6 @@ export default function LandingNavbar({
       icon: (
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />
-        </svg>
-      ),
-    },
-    {
-      href: "/#pricing-showdown",
-      label: "vs Others",
-      icon: (
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.1-4-4L2 16.99z" />
         </svg>
       ),
     },
@@ -132,16 +123,11 @@ export default function LandingNavbar({
             onClick={goToTop}
             className={`flex items-center gap-2 font-bold text-base md:text-lg ${isDark ? "text-white" : "text-indigo-800"}`}
           >
-            <span
-              className={`relative w-10 h-10 rounded-xl overflow-hidden border ${
-                isDark ? "border-white/10 bg-white/[0.06]" : "border-white/40 bg-white/70"
-              }`}
-              aria-hidden
-            >
+            <span className="relative h-8 w-8 sm:h-9 sm:w-9 shrink-0 overflow-hidden rounded-full" aria-hidden>
               <img
                 src="/assets/smeed-logo.png"
                 alt=""
-                className="h-full w-full object-contain p-1"
+                className="h-full w-full object-cover object-center scale-[1.12]"
                 draggable={false}
               />
             </span>

@@ -156,7 +156,7 @@ export default function PrivacyPolicyPage() {
                   </p>
                   <p className="mt-4 text-base leading-relaxed text-gray-700">
                     You can request deletion of your account and associated data
-                    at any time by contacting us at support@chiku-ai.in.
+                    at any time by contacting us at support@smeedai.com.
                   </p>
                 </section>
 
@@ -222,9 +222,9 @@ export default function PrivacyPolicyPage() {
                       Email:{" "}
                       <a
                         className="text-blue-600 hover:underline"
-                        href="mailto:support@chiku-ai.in"
+                        href="mailto:support@smeedai.com"
                       >
-                        support@chiku-ai.in
+                        support@smeedai.com
                       </a>
                     </p>
                   </div>

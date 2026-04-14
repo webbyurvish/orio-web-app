@@ -426,8 +426,7 @@ export default function DashboardPage() {
     resumeId: "",
     language: DEFAULT_SPEECH_LOCALE,
     simpleLanguage: true,
-    extraContext: "Keep answers to the point and with a coding example",
-    aiModel: "GPT-4.1 Mini",
+    extraContext: "",
     saveTranscript: true,
   });
   const [createSessionSubmitting, setCreateSessionSubmitting] = useState(false);
@@ -632,6 +631,29 @@ export default function DashboardPage() {
       }
     }
   }, [activeNav, searchParams, location.pathname, navigate, setSearchParams]);
+
+  // Landing / marketing deep link: open checkout modal for a specific product.
+  useEffect(() => {
+    if (activeNav !== "buy-credits") return;
+    const productId = searchParams.get("openCheckout");
+    if (!productId) return;
+    const product = CHECKOUT_PRODUCTS[productId];
+    if (!product) return;
+
+    const tabForProduct =
+      product.kind === "credits_pack"
+        ? "credits"
+        : product.kind === "subscription"
+          ? "subscription"
+          : "lifetime";
+    setBuyCreditsTab(tabForProduct);
+    setCheckoutProduct(product);
+
+    const next = new URLSearchParams(searchParams);
+    next.delete("openCheckout");
+    if (next.get("tab") !== tabForProduct) next.set("tab", tabForProduct);
+    setSearchParams(next, { replace: true });
+  }, [activeNav, searchParams, setSearchParams]);
 
   // After Stripe Checkout redirect: verify session once, update billing store, clean URL.
   useEffect(() => {
@@ -915,9 +937,7 @@ export default function DashboardPage() {
       resumeId: s.resumeId ?? "",
       language: normalizeSpeechLocale(s.language) || DEFAULT_SPEECH_LOCALE,
       simpleLanguage: s.simpleLanguage,
-      extraContext:
-        s.extraContext || "Keep answers to the point and with a coding example",
-      aiModel: s.aiModel || "GPT-4.1 Mini",
+      extraContext: s.extraContext ?? "",
       saveTranscript: s.saveTranscript,
     }));
     setCreateSessionMode("update");
@@ -939,8 +959,7 @@ export default function DashboardPage() {
       resumeId: "",
       language: DEFAULT_SPEECH_LOCALE,
       simpleLanguage: true,
-      extraContext: "Keep answers to the point and with a coding example",
-      aiModel: "GPT-4.1 Mini",
+      extraContext: "",
       saveTranscript: true,
     });
   };
@@ -948,14 +967,14 @@ export default function DashboardPage() {
   const handleCreateFreeSession = async () => {
     setCreateSessionSubmitting(true);
     try {
+      const ctx = createSessionForm.extraContext.trim();
       const created = await callSessionsApi.create({
         title: createSessionForm.company,
         description: createSessionForm.jobDescription,
         resumeId: createSessionForm.resumeId || undefined,
         language: createSessionForm.language,
         simpleLanguage: createSessionForm.simpleLanguage,
-        extraContext: createSessionForm.extraContext,
-        aiModel: createSessionForm.aiModel,
+        ...(ctx ? { extraContext: ctx } : {}),
         saveTranscript: createSessionForm.saveTranscript,
         isFreeSession: !createSessionIsPaid,
       });
@@ -976,14 +995,14 @@ export default function DashboardPage() {
     if (!editingSessionId) return;
     setCreateSessionSubmitting(true);
     try {
+      const ctx = createSessionForm.extraContext.trim();
       await callSessionsApi.update(editingSessionId, {
         title: createSessionForm.company,
         description: createSessionForm.jobDescription,
         resumeId: createSessionForm.resumeId || undefined,
         language: createSessionForm.language,
         simpleLanguage: createSessionForm.simpleLanguage,
-        extraContext: createSessionForm.extraContext,
-        aiModel: createSessionForm.aiModel,
+        ...(ctx ? { extraContext: ctx } : { extraContext: "" }),
         saveTranscript: createSessionForm.saveTranscript,
       });
 
@@ -1158,10 +1177,13 @@ export default function DashboardPage() {
             }}
             className="flex items-center gap-2.5 min-w-0"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-teal-400 via-violet-500 to-fuchsia-500 text-white shadow-md shadow-teal-500/25">
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C8 2 6 5 6 8c0 2 1 4 2 5l-2 6h12l-2-6c1-1 2-3 2-5 0-3-2-6-6-6zm0 2c2.2 0 4 1.8 4 4 0 1.5-.8 3.2-1.5 4.5L14 18h-4l-.5-5.5C8.8 11.2 8 9.5 8 8c0-2.2 1.8-4 4-4z" />
-              </svg>
+            <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full" aria-hidden>
+              <img
+                src="/assets/smeed-logo.png"
+                alt=""
+                className="h-full w-full object-cover object-center scale-[1.12]"
+                draggable={false}
+              />
             </span>
             {isSidebarExpanded && (
               <span className="orio-font-display text-base font-semibold text-slate-100">
@@ -1240,7 +1262,7 @@ export default function DashboardPage() {
             )}
           </button>
           <a
-            href="mailto:support@parakeet.ai"
+            href="mailto:support@smeedai.com"
             className={`w-full flex items-center ${isSidebarExpanded ? "gap-3 px-4 justify-start" : "justify-center px-0"} py-2.5 text-left text-slate-400 transition hover:bg-white/5 hover:text-slate-100`}
           >
             <span className="shrink-0">
@@ -1355,11 +1377,6 @@ export default function DashboardPage() {
                         ? "Plans & billing"
                         : "Home"))}
               </h1>
-              {activeNav === "desktop-app" ? (
-                <p className="line-clamp-2 text-xs leading-snug text-slate-400 sm:text-sm">
-                  Download the companion app for live interviews
-                </p>
-              ) : null}
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
@@ -3449,31 +3466,10 @@ export default function DashboardPage() {
                             extraContext: e.target.value,
                           }))
                         }
-                        placeholder="Keep answers to the point and with a coding example"
+                        placeholder="e.g. Be concise, include a short code example when helpful, match seniority level…"
                         rows={3}
                         className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-gray-400 outline-none resize-y"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        AI Model{" "}
-                        <InfoTooltip
-                          side="top"
-                          content="Model used to generate answers. Faster models respond quicker; larger models can be more detailed."
-                          label="About AI model"
-                        />
-                      </label>
-                      <div className="flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2">
-                        <span className="text-sm font-medium text-gray-900">
-                          GPT-4.1 Mini
-                        </span>
-                        <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs font-medium text-white">
-                          Recommended
-                        </span>
-                        <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs font-medium text-gray-700">
-                          Fast
-                        </span>
-                      </div>
                     </div>
                   </div>
                   <div className="mt-6 flex justify-between">

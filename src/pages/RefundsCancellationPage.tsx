@@ -146,7 +146,7 @@ export default function RefundsCancellationPage() {
                         1. Contact Support:
                       </span>{" "}
                       Email us at{" "}
-                      <span className="text-orange-600">support@chiku-ai.in</span>{" "}
+                      <span className="text-orange-600">support@smeedai.com</span>{" "}
                       with the subject line &quot;Refund Request&quot;
                     </p>
 
@@ -229,7 +229,7 @@ export default function RefundsCancellationPage() {
                   <ul className="mt-3 list-disc pl-6 space-y-2 text-base text-gray-700">
                     <li>
                       Escalate to our management team via{" "}
-                      <span className="text-orange-600">support@chiku-ai.in</span>
+                      <span className="text-orange-600">support@smeedai.com</span>
                     </li>
                     <li>Contact your bank or payment provider for a chargeback</li>
                     <li>Seek resolution through consumer protection authorities</li>
@@ -278,7 +278,7 @@ export default function RefundsCancellationPage() {
                     <div className="mt-4 space-y-2">
                       <p>
                         <span className="font-semibold text-gray-900">Email:</span>{" "}
-                        support@chiku-ai.in
+                        support@smeedai.com
                       </p>
                       <p>
                         <span className="font-semibold text-gray-900">

@@ -20,6 +20,7 @@ type SignupForm = z.infer<typeof signupSchema>
 export default function SignupPage() {
   const navigate = useNavigate()
   const setAuth = useAuthStore((s) => s.setAuth)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [verifyOpen, setVerifyOpen] = useState(false)
@@ -42,6 +43,11 @@ export default function SignupPage() {
     }, 500)
     return () => window.clearInterval(t)
   }, [verifyOpen, resendCooldownSeconds])
+
+  useEffect(() => {
+    if (!isAuthenticated) return
+    navigate('/dashboard', { replace: true })
+  }, [isAuthenticated, navigate])
 
   const { register, handleSubmit, formState: { errors } } = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),

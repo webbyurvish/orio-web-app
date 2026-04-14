@@ -1,6 +1,15 @@
 import { useId, useState, type ReactElement } from "react";
 
-type FeatureId = "notes" | "resumes" | "desktop" | "answers" | "coding";
+type FeatureId = "notes" | "resumes" | "desktop" | "autoAnswer" | "multilang" | "answers" | "coding";
+
+const CORE_EXPERIENCE_BENEFITS = [
+  "Real-time interview assistance with instant AI answers",
+  "Stealth desktop companion alongside Zoom, Meet, or Teams",
+  "Smart context awareness (resume, role, company understanding)",
+  "Fast, low-latency responses during live interviews",
+  "Session memory for improved answers over time",
+  "Interview mode control (natural, strict, aggressive)",
+] as const;
 
 const FEATURES: {
   id: FeatureId;
@@ -26,6 +35,18 @@ const FEATURES: {
     title: "Desktop companion",
     description: "A focused window beside Zoom, Meet, or Teams for real interviews.",
     Icon: IconMonitor,
+  },
+  {
+    id: "autoAnswer",
+    title: "Smart Auto Answer Mode",
+    description: "Auto-detects interview questions and responds instantly in real time.",
+    Icon: IconBolt,
+  },
+  {
+    id: "multilang",
+    title: "Multi-language & Accent Support",
+    description: "Works across different languages and understands varied accents.",
+    Icon: IconGlobe,
   },
   {
     id: "answers",
@@ -82,6 +103,26 @@ function IconCode() {
   return (
     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+    </svg>
+  );
+}
+
+function IconBolt() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+  );
+}
+
+function IconGlobe() {
+  return (
+    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
     </svg>
   );
 }
@@ -154,6 +195,57 @@ function PreviewResumes() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function PreviewAutoAnswer() {
+  return (
+    <div className="space-y-4">
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-400/80">Smart Auto Answer</p>
+      <div className="rounded-xl border border-amber-400/25 bg-amber-500/[0.06] px-3 py-2">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-200/90">Question detected</p>
+        <p className="mt-1 text-sm text-slate-200">
+          &ldquo;Tell me about a time you had to push back on a deadline.&rdquo;
+        </p>
+      </div>
+      <div className="rounded-xl border border-teal-500/25 bg-gradient-to-br from-teal-500/[0.1] to-violet-600/[0.06] p-4">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-teal-300/90">Suggested reply · ready to speak</p>
+        <p className="mt-2 text-sm leading-relaxed text-slate-200">
+          I aligned expectations early, showed tradeoffs with data, and proposed a smaller slice we could ship on time —
+          then negotiated scope with stakeholders.
+        </p>
+      </div>
+      <p className="text-center text-[11px] text-slate-500">Keeps pace with live conversation — you stay in control</p>
+    </div>
+  );
+}
+
+function PreviewMultilang() {
+  return (
+    <div className="space-y-4">
+      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-400/80">Languages &amp; accents</p>
+      <div className="flex flex-wrap gap-2">
+        {["English", "Hindi", "Spanish", "More"].map((lang, i) => (
+          <span
+            key={lang}
+            className={`rounded-full border px-3 py-1 text-[11px] font-medium ${
+              i === 0
+                ? "border-teal-400/40 bg-teal-500/15 text-teal-100"
+                : "border-white/[0.1] bg-white/[0.04] text-slate-400"
+            }`}
+          >
+            {lang}
+          </span>
+        ))}
+      </div>
+      <div className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4">
+        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Session language</p>
+        <p className="mt-2 text-sm text-slate-300">
+          Pick one language per session so listening and answers stay in sync — tuned for real-world accents.
+        </p>
+      </div>
+      <p className="text-center text-[11px] text-slate-500">Switch when your interview language changes</p>
     </div>
   );
 }
@@ -293,6 +385,10 @@ function FeaturePreview({ id }: { id: FeatureId }) {
       return <PreviewResumes />;
     case "desktop":
       return <PreviewDesktop />;
+    case "autoAnswer":
+      return <PreviewAutoAnswer />;
+    case "multilang":
+      return <PreviewMultilang />;
     case "answers":
       return <PreviewAnswers />;
     case "coding":
@@ -369,16 +465,29 @@ export function LandingFeatureShowcase({ title, subtitle }: LandingFeatureShowca
           <div
             id={panelId}
             role="tabpanel"
-            aria-labelledby={tabId(FEATURES.findIndex((f) => f.id === active))}
-            className="relative min-h-[380px] lg:min-h-[480px]"
+            aria-labelledby={tabId(Math.max(0, FEATURES.findIndex((f) => f.id === active)))}
+            className="relative min-h-[420px] lg:min-h-[520px]"
           >
             <div className="pointer-events-none absolute -inset-[1px] rounded-[1.35rem] bg-gradient-to-b from-teal-400/35 via-violet-500/25 to-fuchsia-500/30 opacity-80 blur-[1px]" aria-hidden />
-            <div className="relative flex h-full min-h-[380px] flex-col overflow-hidden rounded-[1.25rem] border border-white/[0.1] bg-[#06060c] shadow-[0_32px_80px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)] lg:min-h-[480px]">
+            <div className="relative flex h-full min-h-[420px] flex-col overflow-hidden rounded-[1.25rem] border border-white/[0.1] bg-[#06060c] shadow-[0_32px_80px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.06)] lg:min-h-[520px]">
               <div
                 className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_0%,rgba(45,212,191,0.08),transparent_50%),radial-gradient(ellipse_60%_50%_at_100%_100%,rgba(139,92,246,0.1),transparent_45%)]"
                 aria-hidden
               />
               <div className="relative flex flex-1 flex-col p-6 md:p-8">
+                <div className="mb-5 border-b border-white/[0.06] pb-5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-400/80">Core experience</p>
+                  <ul className="mt-3 space-y-2.5 text-left">
+                    {CORE_EXPERIENCE_BENEFITS.map((line) => (
+                      <li key={line} className="flex gap-2.5 text-[13px] leading-snug text-slate-300">
+                        <span className="mt-0.5 shrink-0 text-teal-400/90" aria-hidden>
+                          ✓
+                        </span>
+                        <span>{line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
                 <div className="mb-4 flex items-center gap-2 border-b border-white/[0.06] pb-4">
                   <div className="flex gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
@@ -387,7 +496,7 @@ export function LandingFeatureShowcase({ title, subtitle }: LandingFeatureShowca
                   </div>
                   <span className="ml-3 text-[11px] font-medium text-slate-500">orioai.app</span>
                 </div>
-                <div key={active} className="flex-1 orio-feature-preview-enter">
+                <div key={active} className="min-h-0 flex-1 orio-feature-preview-enter">
                   <FeaturePreview id={active} />
                 </div>
               </div>

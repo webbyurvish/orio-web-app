@@ -37,6 +37,7 @@ import { Skeleton, SkeletonText } from "../components/Skeleton";
 
 const ResumeEditorPage = lazy(() => import("./ResumeEditorPage"));
 const BrowserSessionPage = lazy(() => import("./BrowserSessionPage"));
+const AnswerFormatLabPage = lazy(() => import("./AnswerFormatLabPage"));
 import { ResumeParsingModal } from "../components/ResumeParsingModal";
 import {
   callSessionsApi,
@@ -68,7 +69,6 @@ const BUY_CREDITS_SEGMENT_TABS = [
   // Keep identical to LandingPage pricing tabs for 1:1 UX.
   { id: "credits" as const, label: "Credits" },
   { id: "subscription" as const, label: "Subscribe" },
-  { id: "lifetime" as const, label: "Lifetime" },
 ];
 
 const DASHBOARD_PRICING_CONFIG = {
@@ -77,50 +77,54 @@ const DASHBOARD_PRICING_CONFIG = {
       "30-Day Money Back",
       "Used by 10,000+ candidates",
       "Credits Never Expire",
-      "1 Credit = 1h Call",
+      "1 Credit = 30 min Call",
     ],
     plans: [
       {
-        name: "Basic",
-        icon: "•••",
-        priceInr: "899",
-        priceUsd: "9.99",
-        priceWasInr: "1,199",
-        priceWasUsd: "13.32",
-        detail: "3 Call Credits",
+        name: "Standard",
+        icon: "•",
+        tagline: "Perfect for your next interview",
+        priceInr: "99",
+        priceUsd: "1.10",
+        priceWasInr: "199",
+        priceWasUsd: "2.21",
+        detail: "1 Interview (30 mins)",
         cta: "Get Started",
         highlighted: false,
       },
       {
-        name: "Plus",
-        icon: "••••••",
-        priceInr: "1,499",
-        priceUsd: "16.65",
-        priceWasInr: "1,999",
-        priceWasUsd: "22.21",
-        detail: "6 Call Credits + 2 Free",
-        cta: "Get Credits",
-        highlighted: false,
-      },
-      {
         name: "Pro",
-        icon: "•••••••••",
-        priceInr: "2,499",
-        priceUsd: "27.77",
-        detail: "9 Call Credits + 4 Free",
+        icon: "•••",
+        tagline: "Recommended for active job seekers",
+        priceInr: "199",
+        priceUsd: "2.21",
+        priceWasInr: "299",
+        priceWasUsd: "3.32",
+        detail: "2 Interviews + 1 Free",
+        subtext: "~₹66 per interview",
         cta: "Get Credits",
         highlighted: true,
         badge: "Best Value",
-        subtext: "Most chosen by serious candidates",
-        priceWasInr: "3,499",
-        priceWasUsd: "38.88",
+      },
+      {
+        name: "Pro Max",
+        icon: "•••••••••••••••",
+        tagline: "Maximum value for frequent interviews",
+        priceInr: "699",
+        priceUsd: "7.77",
+        detail: "10 Interviews + 5 Free",
+        cta: "Get Credits",
+        highlighted: false,
+        subtext: "~₹47 per interview • For heavy users",
+        priceWasInr: "999",
+        priceWasUsd: "11.10",
       },
     ],
   },
   subscription: {
     benefits: [
       "30-Day Money Back",
-      "Unlimited Calls",
+      "Unlimited Interviews",
       "Cancel Anytime",
       "Used by 10,000+ candidates",
     ],
@@ -128,49 +132,26 @@ const DASHBOARD_PRICING_CONFIG = {
       {
         name: "Monthly",
         icon: "🗓",
-        priceInr: "1,999",
-        priceUsd: "22.21",
+        priceInr: "999",
+        priceUsd: "11.10",
         priceWasInr: "2,499",
         priceWasUsd: "27.77",
-        detail: "Unlimited Calls",
+        detail: "Unlimited Interviews",
         cta: "Subscribe",
         highlighted: false,
       },
       {
         name: "Yearly",
         icon: "📅",
-        priceInr: "12,999",
-        priceUsd: "144.43",
-        detail: "Unlimited Calls • Save 45%",
+        priceInr: "9,999",
+        priceUsd: "111.10",
+        detail: "Unlimited Interviews • Save 45%",
         cta: "Subscribe",
         highlighted: true,
         badge: "Best Value",
         subtext: "Recommended for serious job seekers",
         priceWasInr: "16,999",
         priceWasUsd: "188.88",
-      },
-    ],
-  },
-  lifetime: {
-    benefits: [
-      "30-Day Money Back",
-      "Unlimited Calls Forever",
-      "One-Time Payment",
-      "Used by 10,000+ candidates",
-    ],
-    plans: [
-      {
-        name: "Lifetime",
-        icon: "∞",
-        priceInr: "19,999",
-        priceUsd: "222.21",
-        detail: "Unlimited Calls Forever",
-        cta: "Get Lifetime",
-        highlighted: true,
-        badge: "Limited Time Offer",
-        subtext: "Best for long-term career growth",
-        priceWasInr: "29,999",
-        priceWasUsd: "333.21",
       },
     ],
   },
@@ -181,15 +162,16 @@ function getCheckoutProductForPricing(
   planName: string,
 ): CheckoutProduct {
   if (tab === "credits") {
-    if (planName === "Basic") return CHECKOUT_PRODUCTS.credits_basic;
-    if (planName === "Plus") return CHECKOUT_PRODUCTS.credits_plus;
+    if (planName === "Standard") return CHECKOUT_PRODUCTS.credits_basic;
+    if (planName === "Pro") return CHECKOUT_PRODUCTS.credits_plus;
     return CHECKOUT_PRODUCTS.credits_pro;
   }
   if (tab === "subscription") {
     if (planName === "Monthly") return CHECKOUT_PRODUCTS.sub_monthly;
     return CHECKOUT_PRODUCTS.sub_yearly;
   }
-  return CHECKOUT_PRODUCTS.lifetime;
+  // Should never happen: lifetime removed from UI.
+  return CHECKOUT_PRODUCTS.sub_monthly;
 }
 
 function IconHome() {
@@ -459,7 +441,7 @@ export default function DashboardPage() {
   const [conversationAiNotesLoading, setConversationAiNotesLoading] =
     useState(false);
   const [buyCreditsTab, setBuyCreditsTab] = useState<
-    "credits" | "subscription" | "lifetime"
+    "credits" | "subscription"
   >("credits");
   const [createSessionIsPaid, setCreateSessionIsPaid] = useState(false);
   const [checkoutProduct, setCheckoutProduct] =
@@ -472,6 +454,9 @@ export default function DashboardPage() {
   const billingUnlimited = useBillingStore((s) => s.unlimitedAccess);
   const billingPlanDisplay = useBillingStore((s) => s.planDisplay);
   const setCreditsFromServer = useBillingStore((s) => s.setCreditsFromServer);
+  const setEntitlementsFromServer = useBillingStore(
+    (s) => s.setEntitlementsFromServer,
+  );
 
   const displayName =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
@@ -536,7 +521,14 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user?.callCredits == null) return;
     setCreditsFromServer(user.callCredits);
-  }, [user?.callCredits]);
+    setEntitlementsFromServer(!!user.unlimitedAccess, user.planDisplay ?? null);
+  }, [
+    user?.callCredits,
+    user?.unlimitedAccess,
+    user?.planDisplay,
+    setCreditsFromServer,
+    setEntitlementsFromServer,
+  ]);
 
   // Refresh persisted user credits once on dashboard entry so refresh doesn't lose post-purchase credits.
   const didRefreshMeRef = useRef(false);
@@ -549,11 +541,12 @@ export default function DashboardPage() {
         const me = await authApi.getCurrentUser();
         setUser(me);
         setCreditsFromServer(me.callCredits ?? 0);
+        setEntitlementsFromServer(!!me.unlimitedAccess, me.planDisplay ?? null);
       } catch {
         /* ignore */
       }
     })();
-  }, [setUser, setCreditsFromServer]);
+  }, [setUser, setCreditsFromServer, setEntitlementsFromServer]);
 
   const openPaidSessionFlow = () => {
     // 30 mins = 0.5 credits. If user has no credits (and no unlimited), show modal instead.
@@ -591,6 +584,8 @@ export default function DashboardPage() {
       setActiveNav("call-sessions");
     } else if (pathname.startsWith("/dashboard/desktop-app")) {
       setActiveNav("desktop-app");
+    } else if (pathname.startsWith("/dashboard/answer-format-lab")) {
+      setActiveNav("answer-lab");
     } else if (pathname.startsWith("/dashboard/cvs")) {
       setActiveNav("cvs");
     } else if (pathname.startsWith("/dashboard/profile")) {
@@ -619,7 +614,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (activeNav !== "buy-credits") return;
     const tab = searchParams.get("tab");
-    if (tab === "subscription" || tab === "lifetime" || tab === "credits") {
+    if (tab === "subscription" || tab === "credits") {
       setBuyCreditsTab(tab);
     } else {
       setBuyCreditsTab("credits");
@@ -645,7 +640,7 @@ export default function DashboardPage() {
         ? "credits"
         : product.kind === "subscription"
           ? "subscription"
-          : "lifetime";
+          : "credits";
     setBuyCreditsTab(tabForProduct);
     setCheckoutProduct(product);
 
@@ -695,6 +690,7 @@ export default function DashboardPage() {
             const me = await authApi.getCurrentUser();
             setUser(me);
             setCreditsFromServer(me.callCredits ?? 0);
+            setEntitlementsFromServer(!!me.unlimitedAccess, me.planDisplay ?? null);
           } catch {
             /* ignore */
           }
@@ -1101,6 +1097,12 @@ export default function DashboardPage() {
     [location.pathname],
   );
 
+  const answerFormatLabPathMatch = useMemo(
+    () =>
+      matchPath({ path: "/dashboard/answer-format-lab", end: true }, location.pathname),
+    [location.pathname],
+  );
+
   if (!FEATURE_BROWSER_SESSION_ENABLED && browserSessionPathMatch) {
     return <Navigate to="/dashboard/call-sessions" replace />;
   }
@@ -1110,6 +1112,7 @@ export default function DashboardPage() {
     if (pathname === "/dashboard" || pathname === "/dashboard/") return true;
     if (pathname.startsWith("/dashboard/call-sessions")) return true;
     if (pathname.startsWith("/dashboard/desktop-app")) return true;
+    if (pathname.startsWith("/dashboard/answer-format-lab")) return true;
     if (pathname.startsWith("/dashboard/profile")) return true;
     if (pathname.startsWith("/dashboard/buyCredits")) return true;
     if (pathname.startsWith("/dashboard/purchase")) return true;
@@ -1146,6 +1149,16 @@ export default function DashboardPage() {
       <div className="orio-workspace-bg relative h-dvh max-h-dvh min-h-0 overflow-hidden">
         <Suspense fallback={<AppRouteFallback />}>
           <BrowserSessionPage sessionId={browserSessionId} />
+        </Suspense>
+      </div>
+    );
+  }
+
+  if (answerFormatLabPathMatch) {
+    return (
+      <div className="orio-workspace-bg relative h-dvh max-h-dvh min-h-0 overflow-hidden">
+        <Suspense fallback={<AppRouteFallback />}>
+          <AnswerFormatLabPage />
         </Suspense>
       </div>
     );
@@ -1259,6 +1272,29 @@ export default function DashboardPage() {
             </span>
             {isSidebarExpanded && (
               <span className="text-sm font-medium">Download Desktop App</span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateFromSidebar("/dashboard/answer-format-lab")}
+            className={`w-full flex items-center ${isSidebarExpanded ? "gap-3 px-4 justify-start" : "justify-center px-0"} py-2.5 text-left transition ${
+              activeNav === "answer-lab"
+                ? "border-l-2 border-teal-400/80 bg-teal-500/10 text-slate-100"
+                : "text-slate-400 hover:bg-white/5 hover:text-slate-100"
+            }`}
+          >
+            <span className="shrink-0 text-slate-500" aria-hidden>
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.75}
+                  d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23-.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5"
+                />
+              </svg>
+            </span>
+            {isSidebarExpanded && (
+              <span className="text-sm font-medium">Answer format lab</span>
             )}
           </button>
           <a
@@ -1494,7 +1530,7 @@ export default function DashboardPage() {
                     id: "home",
                     title: "Step 1: Free Session",
                     emoji: "⏰",
-                    desc: "See how easy Smeed AI is to use. Free Sessions are free and limited to 10 minutes.",
+                    desc: "See how easy Smeed AI is to use. Free trial sessions last 10 minutes, with a 15-minute cooldown between sessions.",
                     btn: "Create Session",
                     primary: false,
                   },
@@ -1773,7 +1809,7 @@ export default function DashboardPage() {
                       ),
                     },
                     {
-                      text: "Available on Desktop app, Web app, and Mobile",
+                      text: "Available on Desktop app (Windows). Mac coming soon.",
                       icon: (
                         <svg
                           className="w-4 h-4"
@@ -1901,7 +1937,7 @@ export default function DashboardPage() {
                     Invest in your offer
                   </h2>
                   <p className="mx-auto mt-3 max-w-md text-sm text-slate-400">
-                    Credits, subscription, or lifetime — you choose the runway.
+                    Credits or subscription — you choose the runway.
                   </p>
 
                   <SegmentedTabList
@@ -1964,8 +2000,8 @@ export default function DashboardPage() {
                           <div
                             className={`relative flex h-full min-h-[420px] flex-col rounded-[24px] px-8 pb-8 text-center transition-all duration-300 ${
                               plan.highlighted
-                                ? "pt-12 orio-glow-ring bg-[#0c0c14]"
-                                : "pt-8 border border-white/[0.08] bg-white/[0.02] hover:border-teal-400/20 hover:bg-white/[0.04]"
+                                ? "pt-10 orio-glow-ring bg-[#0c0c14]"
+                                : "pt-10 border border-white/[0.08] bg-white/[0.02] hover:border-teal-400/20 hover:bg-white/[0.04]"
                             }`}
                           >
                             {"badge" in plan &&
@@ -1980,6 +2016,13 @@ export default function DashboardPage() {
                             <h3 className="orio-font-display mt-2 text-2xl font-bold text-white">
                               {plan.name}
                             </h3>
+                            {"tagline" in plan && plan.tagline ? (
+                              <p className="mt-1 text-sm font-medium text-slate-300">
+                                {plan.tagline}
+                              </p>
+                            ) : (
+                              <div className="mt-1" aria-hidden />
+                            )}
                             <div className="mt-3 flex min-h-[2.75rem] flex-col items-center justify-center gap-0.5">
                               {"priceWasInr" in plan ? (
                                 <>
@@ -2813,36 +2856,6 @@ export default function DashboardPage() {
                   </button>
                 </section>
                 <section className="bg-white rounded-xl border border-gray-200 p-5">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-2">
-                    Lifetime Access
-                  </h3>
-                  <p className="text-xs text-gray-500 mb-3">
-                    No lifetime access purchased
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigate("/dashboard/buyCredits?tab=lifetime")
-                    }
-                    className="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    Buy Lifetime
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M14 5l7 7m0 0l-7 7m7-7H3"
-                      />
-                    </svg>
-                  </button>
-                </section>
-                <section className="bg-white rounded-xl border border-gray-200 p-5">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-sm font-semibold text-gray-900">
                       Delete Account
@@ -2853,7 +2866,7 @@ export default function DashboardPage() {
                   </div>
                   <p className="text-xs text-gray-600">
                     Deleting your account will permanently remove your data,
-                    credits, active subscriptions, and lifetime plans. This
+                    credits and active subscriptions. This
                     action cannot be undone.
                   </p>
                 </section>
@@ -3643,7 +3656,7 @@ export default function DashboardPage() {
                           </p>
                           <p>
                             You won&apos;t be able to create another free
-                            session for the next 12 minutes.
+                            session for the next 15 minutes.
                           </p>
                         </div>
                       )}
@@ -4100,6 +4113,10 @@ export default function DashboardPage() {
                                 const me = await authApi.getCurrentUser();
                                 setUser(me);
                                 setCreditsFromServer(me.callCredits ?? 0);
+                                setEntitlementsFromServer(
+                                  !!me.unlimitedAccess,
+                                  me.planDisplay ?? null,
+                                );
                                 if (!useBillingStore.getState().unlimitedAccess) {
                                   const c = me.callCredits ?? 0;
                                   useNotificationsStore.getState().add({

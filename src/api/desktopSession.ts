@@ -38,6 +38,20 @@ function authHeader(): HeadersInit {
   }
 }
 
+function errorTextFromFailedResponse(status: number, body: string): string {
+  const t = body.trim()
+  if (t.startsWith('{')) {
+    try {
+      const j = JSON.parse(t) as { message?: string; detail?: string }
+      const combined = [j.message, j.detail].filter(Boolean).join(' — ')
+      if (combined) return combined
+    } catch {
+      /* use raw body */
+    }
+  }
+  return t || `Request failed (${status})`
+}
+
 /** Reads NDJSON lines `{ "d": "chunk" }` or `{ "error": "..." }`. */
 export async function streamDesktopAiAnswer(
   payload: DesktopAiAnswerPayload,
@@ -57,7 +71,7 @@ export async function streamDesktopAiAnswer(
 
   if (!res.ok) {
     const t = await res.text().catch(() => res.statusText)
-    throw new Error(t || `AI answer failed (${res.status})`)
+    throw new Error(errorTextFromFailedResponse(res.status, t))
   }
 
   const reader = res.body?.getReader()
@@ -79,13 +93,14 @@ export async function streamDesktopAiAnswer(
     for (const line of lines) {
       const trimmed = line.trim()
       if (!trimmed) continue
-      let obj: { d?: string; error?: string }
+      let obj: { d?: string; error?: string; m?: string }
       try {
-        obj = JSON.parse(trimmed) as { d?: string; error?: string }
+        obj = JSON.parse(trimmed) as { d?: string; error?: string; m?: string }
       } catch {
         continue
       }
       if (obj.error) throw new Error(obj.error)
+      if (obj.m === 'stream-open') continue
       if (obj.d) {
         full += obj.d
         onDelta(obj.d)
@@ -96,9 +111,11 @@ export async function streamDesktopAiAnswer(
   const tail = buffer.trim()
   if (tail) {
     try {
-      const obj = JSON.parse(tail) as { d?: string; error?: string }
+      const obj = JSON.parse(tail) as { d?: string; error?: string; m?: string }
       if (obj.error) throw new Error(obj.error)
-      if (obj.d) {
+      if (obj.m === 'stream-open') {
+        /* ignore */
+      } else if (obj.d) {
         full += obj.d
         onDelta(obj.d)
       }
@@ -134,7 +151,7 @@ export async function streamDesktopScreenshotAnswer(
 
   if (!res.ok) {
     const t = await res.text().catch(() => res.statusText)
-    throw new Error(t || `Screenshot AI failed (${res.status})`)
+    throw new Error(errorTextFromFailedResponse(res.status, t))
   }
 
   const reader = res.body?.getReader()
@@ -156,13 +173,14 @@ export async function streamDesktopScreenshotAnswer(
     for (const line of lines) {
       const trimmed = line.trim()
       if (!trimmed) continue
-      let obj: { d?: string; error?: string }
+      let obj: { d?: string; error?: string; m?: string }
       try {
-        obj = JSON.parse(trimmed) as { d?: string; error?: string }
+        obj = JSON.parse(trimmed) as { d?: string; error?: string; m?: string }
       } catch {
         continue
       }
       if (obj.error) throw new Error(obj.error)
+      if (obj.m === 'stream-open') continue
       if (obj.d) {
         full += obj.d
         onDelta(obj.d)
@@ -173,9 +191,11 @@ export async function streamDesktopScreenshotAnswer(
   const tail = buffer.trim()
   if (tail) {
     try {
-      const obj = JSON.parse(tail) as { d?: string; error?: string }
+      const obj = JSON.parse(tail) as { d?: string; error?: string; m?: string }
       if (obj.error) throw new Error(obj.error)
-      if (obj.d) {
+      if (obj.m === 'stream-open') {
+        /* ignore */
+      } else if (obj.d) {
         full += obj.d
         onDelta(obj.d)
       }

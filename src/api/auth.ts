@@ -8,6 +8,8 @@ export interface UserDto {
   profilePictureUrl?: string
   isEmailVerified: boolean
   callCredits: number
+  unlimitedAccess?: boolean
+  planDisplay?: string | null
   hasDiscoveryResponse?: boolean
   isAdmin?: boolean
 }

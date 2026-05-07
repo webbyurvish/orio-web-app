@@ -9,14 +9,12 @@ import { RevealOnScroll } from "./RevealOnScroll";
  * alternatives / affordable pages; Smeed AI numbers match the live landing pricing config.
  */
 const SMEED_PRICING = {
-  creditsInr: "899",
-  creditsUsd: "9.99",
-  monthlyInr: "1,999",
-  monthlyUsd: "22.21",
-  yearlyInr: "12,999",
-  yearlyUsd: "144.43",
-  lifetimeInr: "19,999",
-  lifetimeUsd: "222.21",
+  creditsInr: "99",
+  creditsUsd: "1.10",
+  monthlyInr: "999",
+  monthlyUsd: "11.10",
+  yearlyInr: "9,999",
+  yearlyUsd: "111.10",
 } as const;
 
 type Rival = {
@@ -76,8 +74,8 @@ type ComparisonRow = {
 
 const COMPARISON_ROWS: ComparisonRow[] = [
   {
-    label: "Free trial / free credits",
-    smeed: "2 Free Credits",
+    label: "Free trial",
+    smeed: "10-min sessions",
     smeedCheck: true,
     smeedBold: true,
     parakeet: "Limited",
@@ -87,14 +85,14 @@ const COMPARISON_ROWS: ComparisonRow[] = [
   },
   {
     label: "Pricing model",
-    smeed: "Credits + Subscription + Lifetime",
+    smeed: "Credits + Subscription",
     parakeet: "Credits",
     lockedin: "Subscription",
     chiku: "Credits",
   },
   {
     label: "Starting price",
-    smeed: "₹899",
+    smeed: `₹${SMEED_PRICING.creditsInr}`,
     parakeet: "~₹2,650",
     lockedin: "~₹6,000/month",
     chiku: "~₹1,199",
@@ -210,7 +208,7 @@ function scrollToPricingSection(): boolean {
 }
 
 const SMEED_VALUE_BULLETS = [
-  "2 Full Interview Sessions",
+  "10 minutes of interview time",
   "Real-time AI responses",
   "No credit card required",
   "Credits never expire",
@@ -307,8 +305,7 @@ export function CompetitorPriceShowdownSection() {
               />
               <div className="relative mb-3 rounded-xl border border-amber-400/35 bg-gradient-to-r from-amber-500/20 via-orange-500/10 to-teal-500/15 px-3 py-2 text-center shadow-[0_0_28px_rgba(251,191,36,0.12)]">
                 <p className="text-[11px] font-bold leading-snug text-amber-100 md:text-xs">
-                  <span aria-hidden>🔥</span> Limited time: Get 2 free credits{" "}
-                  <span className="text-amber-200/80">(early users only)</span>
+                  <span aria-hidden>🔥</span> Limited time: free 10-minute sessions
                 </p>
               </div>
               <article className="relative flex h-full flex-col overflow-hidden rounded-[1.25rem] border border-teal-400/35 bg-[#040408] shadow-[0_0_0_1px_rgba(45,212,191,0.18),0_32px_90px_rgba(0,0,0,0.55)]">
@@ -323,7 +320,7 @@ export function CompetitorPriceShowdownSection() {
                 </div>
                 <div className="relative flex flex-1 flex-col px-5 pb-5 pt-4">
                   <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-teal-300/90">
-                    <span aria-hidden>🎁</span> Get 2 Free Interview Credits
+                    <span aria-hidden>🎁</span> Try free 10-minute sessions
                   </p>
                   <p className="mt-2 text-[12px] font-medium text-slate-400">
                     Start free <span className="text-slate-600">•</span> Paid plans from ₹{SMEED_PRICING.creditsInr}
@@ -345,9 +342,6 @@ export function CompetitorPriceShowdownSection() {
                     </p>
                     <p>
                       <span className="font-semibold text-slate-300">Yearly:</span> ₹{SMEED_PRICING.yearlyInr}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-slate-300">Lifetime:</span> ₹{SMEED_PRICING.lifetimeInr}
                     </p>
                   </div>
                   <p className="mt-3 text-[11px] font-medium text-amber-200/85">
@@ -533,7 +527,7 @@ export function CompetitorPriceShowdownSection() {
           <div className="relative z-10 mx-auto mt-12 max-w-xl text-center lg:mt-14">
             <p className="text-sm font-medium leading-relaxed text-slate-100 md:text-[15px]">
               <span aria-hidden>🎁 </span>
-              Start free with 2 interview credits — no payment required
+              Start free with 10-minute trial sessions — no payment required
             </p>
             <Link
               to={tryForFreeRoute}

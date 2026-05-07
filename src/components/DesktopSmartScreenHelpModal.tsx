@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   SMARTSCREEN_HELP_IMAGE_STEP1,
@@ -38,25 +38,26 @@ function SmartScreenFigure({ src, alt }: { src: string; alt: string }) {
   }, [src]);
 
   return (
-    <figure className="mt-3 overflow-hidden rounded-xl border border-white/[0.08] bg-black/40 ring-1 ring-white/[0.04]">
+    <figure className="relative mt-3 min-h-[140px] overflow-hidden rounded-xl border border-white/[0.08] bg-black/40 ring-1 ring-white/[0.04]">
       {state !== "error" ? (
         <img
           src={src}
           alt={alt}
-          className={`w-full object-contain object-top transition-opacity duration-300 ${
-            state === "ready" ? "opacity-100" : "h-0 min-h-0 opacity-0"
+          className={`block w-full object-contain object-top transition-opacity duration-200 ${
+            state === "ready" ? "opacity-100" : "opacity-0"
           }`}
           loading="lazy"
+          decoding="async"
           onLoad={() => setState("ready")}
           onError={() => setState("error")}
         />
       ) : null}
       {state === "loading" ? (
-        <div className="flex min-h-[120px] items-center justify-center py-8">
-          <span
-            className="h-6 w-6 animate-spin rounded-full border-2 border-teal-400/25 border-t-teal-400"
-            aria-hidden
-          />
+        <div
+          className="pointer-events-none absolute inset-0 flex min-h-[140px] items-center justify-center py-8"
+          aria-hidden
+        >
+          <span className="h-6 w-6 animate-spin rounded-full border-2 border-teal-400/25 border-t-teal-400" />
         </div>
       ) : null}
       {state === "error" ? (
@@ -73,10 +74,6 @@ function SmartScreenFigure({ src, alt }: { src: string; alt: string }) {
 }
 
 export function DesktopSmartScreenHelpModal({ open, onClose }: Props) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
-  const [reachedEnd, setReachedEnd] = useState(false);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -90,53 +87,6 @@ export function DesktopSmartScreenHelpModal({ open, onClose }: Props) {
       document.body.style.overflow = prev;
     };
   }, [open, onClose]);
-
-  useEffect(() => {
-    if (!open) {
-      setReachedEnd(false);
-      return;
-    }
-    setReachedEnd(false);
-  }, [open]);
-
-  /** Fits without scroll → show button. If content grows (e.g. images), hide until bottom unless already there. */
-  useEffect(() => {
-    if (!open) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    const checkLayout = () => {
-      if (el.scrollHeight <= el.clientHeight + 2) {
-        setReachedEnd(true);
-        return;
-      }
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 12;
-      setReachedEnd(atBottom);
-    };
-    checkLayout();
-    const ro = new ResizeObserver(checkLayout);
-    ro.observe(el);
-    el.addEventListener("scroll", checkLayout, { passive: true });
-    return () => {
-      ro.disconnect();
-      el.removeEventListener("scroll", checkLayout);
-    };
-  }, [open]);
-
-  /** Reveal “Got it” when the bottom sentinel scrolls into view. */
-  useEffect(() => {
-    if (!open) return;
-    const root = scrollRef.current;
-    const target = sentinelRef.current;
-    if (!root || !target) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) setReachedEnd(true);
-      },
-      { root, rootMargin: "0px 0px 8px 0px", threshold: 0 },
-    );
-    io.observe(target);
-    return () => io.disconnect();
-  }, [open]);
 
   if (!open) return null;
 
@@ -153,7 +103,7 @@ export function DesktopSmartScreenHelpModal({ open, onClose }: Props) {
         onClick={onClose}
       />
       <div
-        className="relative z-[1] flex w-full max-w-lg max-h-[calc(100dvh-3rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#07070c] shadow-[0_32px_100px_rgba(0,0,0,0.65)] ring-1 ring-teal-500/10 sm:max-h-[calc(100dvh-4rem)]"
+        className="relative z-[1] flex w-full max-w-lg max-h-[min(92dvh,calc(100dvh-3rem))] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#07070c] shadow-[0_32px_100px_rgba(0,0,0,0.65)] ring-1 ring-teal-500/10 sm:max-h-[min(90dvh,calc(100dvh-4rem))]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="smartscreen-modal-title"
@@ -187,10 +137,8 @@ export function DesktopSmartScreenHelpModal({ open, onClose }: Props) {
           </button>
         </div>
 
-        <div
-          ref={scrollRef}
-          className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-6 sm:py-5"
-        >
+        {/* Single scroll region: header fixed, body + “Got it” scroll together (not sticky). */}
+        <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-5 py-4 sm:px-6 sm:py-5 [scrollbar-gutter:stable]">
           <div className="rounded-xl border border-teal-500/25 bg-teal-500/[0.06] px-4 py-3 text-sm leading-relaxed text-slate-300">
             <p>
               Windows shows this warning for all new apps that haven&apos;t built up enough download history yet.{" "}
@@ -226,19 +174,15 @@ export function DesktopSmartScreenHelpModal({ open, onClose }: Props) {
             </div>
           </section>
 
-          <div ref={sentinelRef} className="h-1 w-full shrink-0" aria-hidden />
-
-          {reachedEnd ? (
-            <div className="mt-8 border-t border-white/[0.06] pt-6">
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full rounded-xl bg-gradient-to-r from-teal-500 via-violet-500 to-fuchsia-500 py-3 text-sm font-semibold text-white shadow-lg shadow-teal-500/15 transition hover:brightness-110"
-              >
-                Got it
-              </button>
-            </div>
-          ) : null}
+          <div className="mt-8 border-t border-white/[0.06] pt-6 pb-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full rounded-xl bg-gradient-to-r from-teal-500 via-violet-500 to-fuchsia-500 py-3.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-300/60"
+            >
+              Got it
+            </button>
+          </div>
         </div>
       </div>
     </div>,

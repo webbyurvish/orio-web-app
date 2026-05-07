@@ -336,9 +336,7 @@ export function CustomerVoicesSection() {
           <h2 id="customer-voices-heading" className="orio-font-display mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-[2.75rem]">
             What Our <span className="bg-gradient-to-r from-teal-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">Customers Say</span>
           </h2>
-          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-slate-400">
-            Written reviews, posts, and community voices — auto-scrolling so you can soak in the signal without clicking through.
-          </p>
+          {/* Subtitle removed per product copy update */}
         </div>
 
         <div className="relative z-10 flex flex-col gap-8 md:gap-10">

@@ -120,7 +120,7 @@ export default function RefundsCancellationPage() {
                       </p>
                       <p>
                         <span className="font-semibold text-gray-900">
-                          Pro Plan (₹1999):
+                          Pro Plan (₹999):
                         </span>{" "}
                         ₹4.76 per minute used will be deducted (7 hrs Base AI +
                         10 Voice Sessions)
@@ -249,7 +249,7 @@ export default function RefundsCancellationPage() {
                         Since the free tier doesn&apos;t involve payment, there are
                         no refunds applicable. However, if you experience technical
                         issues, we&apos;re happy to help resolve them or provide
-                        additional free credits when appropriate.
+                        additional free trial time when appropriate.
                       </p>
                     </div>
                   </div>

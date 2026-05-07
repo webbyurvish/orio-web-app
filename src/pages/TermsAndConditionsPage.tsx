@@ -50,7 +50,7 @@ export default function TermsAndConditionsPage() {
                   <div className="mt-3 space-y-3 text-base text-gray-700">
                     <p>
                       <span className="font-semibold text-gray-900">Free Tier:</span>{" "}
-                      10 minutes of usage with 12-minute reset period after exhaustion
+                      10 minutes of usage with 15-minute cooldown between sessions
                     </p>
                     <p>
                       <span className="font-semibold text-gray-900">Starter Plan:</span>{" "}
@@ -62,7 +62,7 @@ export default function TermsAndConditionsPage() {
                     </p>
                     <p>
                       <span className="font-semibold text-gray-900">Pro Plan:</span>{" "}
-                      ₹1999 ($29) for 7 hours of Base AI assistance + 10 voice interview sessions
+                      ₹999 ($11) for 7 hours of Base AI assistance + 10 voice interview sessions
                     </p>
                     <p>
                       All paid subscriptions are valid for the purchased time duration and do not

@@ -246,6 +246,13 @@ export default function ContactUsPage() {
 
         <footer className="mt-14 text-center text-xs text-gray-500">
           <div className="inline-flex items-center gap-2">
+            <img
+              src="/assets/smeed-logo.png"
+              alt=""
+              className="h-5 w-5 rounded-full border border-gray-200 object-cover object-center"
+              aria-hidden
+              draggable={false}
+            />
             <svg
               className="h-4 w-4 text-gray-500"
               viewBox="0 0 24 24"

@@ -9,7 +9,7 @@ import {
 
 type Props = {
   product: CheckoutProduct | null;
-  billingTab: "credits" | "subscription" | "lifetime";
+  billingTab: "credits" | "subscription";
   onClose: () => void;
 };
 

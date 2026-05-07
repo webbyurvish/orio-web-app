@@ -2,15 +2,6 @@ import { useId, useState, type ReactElement } from "react";
 
 type FeatureId = "notes" | "resumes" | "desktop" | "autoAnswer" | "multilang" | "answers" | "coding";
 
-const CORE_EXPERIENCE_BENEFITS = [
-  "Real-time interview assistance with instant AI answers",
-  "Stealth desktop companion alongside Zoom, Meet, or Teams",
-  "Smart context awareness (resume, role, company understanding)",
-  "Fast, low-latency responses during live interviews",
-  "Session memory for improved answers over time",
-  "Interview mode control (natural, strict, aggressive)",
-] as const;
-
 const FEATURES: {
   id: FeatureId;
   title: string;
@@ -475,19 +466,6 @@ export function LandingFeatureShowcase({ title, subtitle }: LandingFeatureShowca
                 aria-hidden
               />
               <div className="relative flex flex-1 flex-col p-6 md:p-8">
-                <div className="mb-5 border-b border-white/[0.06] pb-5">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-teal-400/80">Core experience</p>
-                  <ul className="mt-3 space-y-2.5 text-left">
-                    {CORE_EXPERIENCE_BENEFITS.map((line) => (
-                      <li key={line} className="flex gap-2.5 text-[13px] leading-snug text-slate-300">
-                        <span className="mt-0.5 shrink-0 text-teal-400/90" aria-hidden>
-                          ✓
-                        </span>
-                        <span>{line}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
                 <div className="mb-4 flex items-center gap-2 border-b border-white/[0.06] pb-4">
                   <div className="flex gap-1.5">
                     <span className="h-2.5 w-2.5 rounded-full bg-white/20" />

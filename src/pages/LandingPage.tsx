@@ -16,7 +16,6 @@ import {
 const PRICING_SEGMENT_TABS = [
   { id: "credits" as const, label: "Credits" },
   { id: "subscription" as const, label: "Subscribe" },
-  { id: "lifetime" as const, label: "Lifetime" },
 ];
 
 const STATIC_LANDING_DATA = {
@@ -66,7 +65,7 @@ function c(key: string, data: typeof STATIC_LANDING_DATA) {
 /** Logged-in users go to dashboard checkout; guests continue to signup. */
 function planPurchasePath(
   isAuthenticated: boolean,
-  tab: "credits" | "subscription" | "lifetime",
+  tab: "credits" | "subscription",
   checkoutProductId: string,
 ) {
   if (!isAuthenticated) return "/signup";
@@ -77,7 +76,7 @@ function planPurchasePath(
 export default function LandingPage() {
   const data = STATIC_LANDING_DATA;
   const [desiTab, setDesiTab] = useState<"behavioral" | "technical">("behavioral");
-  const [pricingTab, setPricingTab] = useState<"credits" | "subscription" | "lifetime">("credits");
+  const [pricingTab, setPricingTab] = useState<"credits" | "subscription">("credits");
 
   const faqByCategory = {
     privacy: [
@@ -139,7 +138,7 @@ export default function LandingPage() {
       },
       {
         q: "How does the credit system work?",
-        a: "Credits are divided into 30-minute sessions. Starting a session deducts 0.5 credits and lasts 30 minutes. One minute before the session ends, it automatically extends for another 30 minutes and deducts another 0.5 credits. Credits never expire. Subscriptions and lifetime plans are also available for unlimited usage.",
+        a: "Credits are divided into 30-minute sessions. Starting a session deducts 0.5 credits and lasts 30 minutes. One minute before the session ends, it automatically extends for another 30 minutes and deducts another 0.5 credits. Credits never expire. Subscriptions are also available for unlimited usage.",
       },
       {
         q: "How do I know how many credits I have left?",
@@ -147,7 +146,7 @@ export default function LandingPage() {
       },
       {
         q: "Does Smeed AI offer a referral program?",
-        a: "Yes. After your first purchase, you'll receive a referral code to share. When someone uses your code at checkout, they receive 1 free credit and you receive 2 free credits. Only first-time buyers can use a referral code. If you're eligible for a discount or promotional code, you'll see an option to enter it at checkout.",
+        a: "Yes. After your first purchase, you'll receive a referral code to share. When someone uses your code at checkout, they receive bonus call credits and you receive bonus call credits. Only first-time buyers can use a referral code. If you're eligible for a discount or promotional code, you'll see an option to enter it at checkout.",
       },
       {
         q: "What payment methods do you accept?",
@@ -221,45 +220,49 @@ export default function LandingPage() {
         "30-Day Money Back",
         "Used by 10,000+ candidates",
         "Credits Never Expire",
-        "1 Credit = 1h Call",
+        "1 Credit = 30 min Call",
       ],
       plans: [
         {
-          name: "Basic",
-          icon: "•••",
-          priceInr: "899",
-          priceUsd: "9.99",
-          priceWasInr: "1,199",
-          priceWasUsd: "13.32",
-          detail: "3 Call Credits",
+          name: "Standard",
+          icon: "•",
+          tagline: "Perfect for your next interview",
+          priceInr: "99",
+          priceUsd: "1.10",
+          priceWasInr: "199",
+          priceWasUsd: "2.21",
+          detail: "1 Interview (30 mins)",
           cta: "Get Started",
           highlighted: false,
           checkoutProductId: "credits_basic",
         },
         {
-          name: "Plus",
-          icon: "••••••",
-          priceInr: "1,499",
-          priceUsd: "16.65",
-          priceWasInr: "1,999",
-          priceWasUsd: "22.21",
-          detail: "6 Call Credits + 2 Free",
-          cta: "Get Credits",
-          highlighted: false,
-          checkoutProductId: "credits_plus",
-        },
-        {
           name: "Pro",
-          icon: "•••••••••",
-          priceInr: "2,499",
-          priceUsd: "27.77",
-          detail: "9 Call Credits + 4 Free",
+          icon: "•••",
+          tagline: "Recommended for active job seekers",
+          priceInr: "199",
+          priceUsd: "2.21",
+          priceWasInr: "299",
+          priceWasUsd: "3.32",
+          detail: "2 Interviews + 1 Free",
+          subtext: "~₹66 per interview",
           cta: "Get Credits",
           highlighted: true,
           badge: "Best Value",
-          subtext: "Most chosen by serious candidates",
-          priceWasInr: "3,499",
-          priceWasUsd: "38.88",
+          checkoutProductId: "credits_plus",
+        },
+        {
+          name: "Pro Max",
+          icon: "•••••••••••••••",
+          tagline: "Maximum value for frequent interviews",
+          priceInr: "699",
+          priceUsd: "7.77",
+          detail: "10 Interviews + 5 Free",
+          cta: "Get Credits",
+          highlighted: false,
+          subtext: "~₹47 per interview • For heavy users",
+          priceWasInr: "999",
+          priceWasUsd: "11.10",
           checkoutProductId: "credits_pro",
         },
       ],
@@ -267,7 +270,7 @@ export default function LandingPage() {
     subscription: {
       benefits: [
         "30-Day Money Back",
-        "Unlimited Calls",
+        "Unlimited Interviews",
         "Cancel Anytime",
         "Used by 10,000+ candidates",
       ],
@@ -275,11 +278,11 @@ export default function LandingPage() {
         {
           name: "Monthly",
           icon: "🗓",
-          priceInr: "1,999",
-          priceUsd: "22.21",
+          priceInr: "999",
+          priceUsd: "11.10",
           priceWasInr: "2,499",
           priceWasUsd: "27.77",
-          detail: "Unlimited Calls",
+          detail: "Unlimited Interviews",
           cta: "Subscribe",
           highlighted: false,
           checkoutProductId: "sub_monthly",
@@ -287,9 +290,9 @@ export default function LandingPage() {
         {
           name: "Yearly",
           icon: "📅",
-          priceInr: "12,999",
-          priceUsd: "144.43",
-          detail: "Unlimited Calls • Save 45%",
+          priceInr: "9,999",
+          priceUsd: "111.10",
+          detail: "Unlimited Interviews • Save 45%",
           cta: "Subscribe",
           highlighted: true,
           badge: "Best Value",
@@ -297,29 +300,6 @@ export default function LandingPage() {
           priceWasInr: "16,999",
           priceWasUsd: "188.88",
           checkoutProductId: "sub_yearly",
-        },
-      ],
-    },
-    lifetime: {
-      benefits: [
-        "30-Day Money Back",
-        "Unlimited Calls Forever",
-        "One-Time Payment",
-        "Used by 10,000+ candidates",
-      ],
-      plans: [
-        {
-          name: "Lifetime",
-          icon: "∞",
-          priceInr: "19,999",
-          priceUsd: "222.21",
-          priceWasInr: "27,999",
-          priceWasUsd: "310.00",
-          detail: "Unlimited Calls Forever",
-          cta: "Get Lifetime",
-          highlighted: true,
-          badge: "Limited Time Offer",
-          checkoutProductId: "lifetime",
         },
       ],
     },
@@ -700,7 +680,7 @@ export default function LandingPage() {
 
       {/* PRICING */}
       <RevealOnScroll>
-        <section className="py-20 md:py-32">
+        <section className="pt-12 pb-20 md:pt-16 md:pb-28">
           <div className="saas-container text-center">
             <div id="pricing" className="scroll-mt-24">
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400/80">
@@ -710,7 +690,7 @@ export default function LandingPage() {
                 Invest in your offer
               </h2>
             </div>
-            <p className="mx-auto mt-3 max-w-md text-sm text-slate-400">Credits, subscription, or lifetime — you choose the runway.</p>
+            <p className="mx-auto mt-3 max-w-md text-sm text-slate-400">Credits or subscription — you choose the runway.</p>
 
             <SegmentedTabList
               className="mx-auto mt-10"
@@ -742,7 +722,9 @@ export default function LandingPage() {
                 <LazyMountWhenVisible key={plan.name} theme="dark" className="min-h-0 h-full">
                   <div
                     className={`relative flex h-full min-h-[420px] flex-col rounded-[24px] px-8 pb-8 text-center transition-all duration-300 ${
-                      plan.highlighted ? "pt-12 orio-glow-ring bg-[#0c0c14]" : "pt-8 border border-white/[0.08] bg-white/[0.02] hover:border-teal-400/20 hover:bg-white/[0.04]"
+                      plan.highlighted
+                        ? "pt-10 orio-glow-ring bg-[#0c0c14]"
+                        : "pt-10 border border-white/[0.08] bg-white/[0.02] hover:border-teal-400/20 hover:bg-white/[0.04]"
                     }`}
                   >
                     {"badge" in plan &&
@@ -753,6 +735,13 @@ export default function LandingPage() {
                     ) : null}
                     <p className="text-lg text-slate-500">{plan.icon}</p>
                     <h3 className="orio-font-display mt-2 text-2xl font-bold text-white">{plan.name}</h3>
+                    {"tagline" in plan && plan.tagline ? (
+                      <p className="mt-1 text-sm font-medium text-slate-300">
+                        {plan.tagline}
+                      </p>
+                    ) : (
+                      <div className="mt-1" aria-hidden />
+                    )}
                     <div className="mt-3 flex min-h-[2.75rem] flex-col items-center justify-center gap-0.5">
                       <p className="text-base font-semibold text-slate-500 line-through">₹{plan.priceWasInr}</p>
                       <p className="text-xs text-slate-600 line-through">${plan.priceWasUsd}</p>
@@ -869,7 +858,17 @@ export default function LandingPage() {
         <div className="saas-container pt-16 md:pt-20 pb-8">
           <div className="grid gap-12 md:grid-cols-4">
             <div>
-              <p className="orio-font-display text-xl font-bold text-white">Smeed AI</p>
+              <div className="inline-flex items-center gap-2">
+                <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full border border-white/10" aria-hidden>
+                  <img
+                    src="/assets/smeed-logo.png"
+                    alt=""
+                    className="h-full w-full object-cover object-center scale-[1.12]"
+                    draggable={false}
+                  />
+                </span>
+                <p className="orio-font-display text-xl font-bold text-white">Smeed AI</p>
+              </div>
               <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">Invisible AI assistance for real interviews. Built for clarity under pressure.</p>
               <div className="mt-6 flex gap-2">
                 {socialHandles.map((item) => (

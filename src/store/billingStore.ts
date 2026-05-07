@@ -6,6 +6,7 @@ type BillingState = {
   unlimitedAccess: boolean;
   planDisplay: string | null;
   setCreditsFromServer: (credits: number) => void;
+  setEntitlementsFromServer: (unlimitedAccess: boolean, planDisplay?: string | null) => void;
   applySuccessfulPurchase: (product: CheckoutProduct) => void;
 };
 
@@ -16,6 +17,11 @@ export const useBillingStore = create<BillingState>()(
     planDisplay: null,
     setCreditsFromServer: (credits) =>
       set({ credits: Number.isFinite(credits) ? credits : 0 }),
+    setEntitlementsFromServer: (unlimitedAccess, planDisplay) =>
+      set({
+        unlimitedAccess: !!unlimitedAccess,
+        planDisplay: unlimitedAccess ? (planDisplay ?? null) : null,
+      }),
     applySuccessfulPurchase: (product) => {
       // Stripe verification now applies credits server-side; keep this as a UI fallback for demo/testing.
       if (product.kind === "credits_pack") {
@@ -29,12 +35,6 @@ export const useBillingStore = create<BillingState>()(
           planDisplay: product.planShortLabel ?? "Subscription",
         });
         return;
-      }
-      if (product.kind === "lifetime") {
-        set({
-          unlimitedAccess: true,
-          planDisplay: "Lifetime",
-        });
       }
     },
   }),

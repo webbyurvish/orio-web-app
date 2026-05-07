@@ -25,8 +25,13 @@ export default function AuthDesktopCompletePage() {
     <div className="flex min-h-dvh items-center justify-center orio-workspace-bg px-4 text-[var(--orio-text)]">
       <div className="w-full max-w-xl text-center">
         <div className="flex items-center justify-center gap-2 text-2xl font-bold tracking-tight text-[var(--orio-text)]">
-          <span role="img" aria-label="Parakeet">
-            🦜
+          <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-white/10" aria-hidden>
+            <img
+              src="/assets/smeed-logo.png"
+              alt=""
+              className="h-full w-full object-cover object-center scale-[1.12]"
+              draggable={false}
+            />
           </span>
           <span>Smeed AI</span>
         </div>

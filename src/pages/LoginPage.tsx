@@ -22,6 +22,7 @@ export default function LoginPage() {
   const location = useLocation()
   const setAuth = useAuthStore((s) => s.setAuth)
   const setCreditsFromServer = useBillingStore((s) => s.setCreditsFromServer)
+  const setEntitlementsFromServer = useBillingStore((s) => s.setEntitlementsFromServer)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -43,6 +44,7 @@ export default function LoginPage() {
     onSuccess: (data) => {
       setAuth(data.user, data.token)
       setCreditsFromServer(data.user.callCredits ?? 0)
+      setEntitlementsFromServer(!!data.user.unlimitedAccess, data.user.planDisplay ?? null)
       const destination = callbackUrl || '/dashboard'
       console.info('[WEB-AUTH] Login success', { destination, callbackUrl })
       navigate(destination)
@@ -71,6 +73,7 @@ export default function LoginPage() {
       const data = await authApi.googleLogin(token)
       setAuth(data.user, data.token)
       setCreditsFromServer(data.user.callCredits ?? 0)
+      setEntitlementsFromServer(!!data.user.unlimitedAccess, data.user.planDisplay ?? null)
       const destination = callbackUrl || '/dashboard'
       console.info('[WEB-AUTH] Google login success', { destination, callbackUrl })
       navigate(destination)

@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query'
 import { GoogleLogin } from '@react-oauth/google'
 import { authApi } from '../api/auth'
 import { useAuthStore } from '../store/authStore'
+import { useBillingStore } from '../store/billingStore'
 import { AuthFlyoutLayout } from '../components/AuthFlyoutLayout'
 
 const signupSchema = z.object({
@@ -21,6 +22,8 @@ export default function SignupPage() {
   const navigate = useNavigate()
   const setAuth = useAuthStore((s) => s.setAuth)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const setCreditsFromServer = useBillingStore((s) => s.setCreditsFromServer)
+  const setEntitlementsFromServer = useBillingStore((s) => s.setEntitlementsFromServer)
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [verifyOpen, setVerifyOpen] = useState(false)
@@ -73,6 +76,8 @@ export default function SignupPage() {
     mutationFn: authApi.registerVerify,
     onSuccess: (data) => {
       setAuth(data.user, data.token)
+      setCreditsFromServer(data.user.callCredits ?? 0)
+      setEntitlementsFromServer(!!data.user.unlimitedAccess, data.user.planDisplay ?? null)
       setVerifyOpen(false)
       navigate('/dashboard', { state: { openDiscoveryModal: true } })
     },
@@ -121,6 +126,8 @@ export default function SignupPage() {
     try {
       const data = await authApi.googleLogin(token)
       setAuth(data.user, data.token)
+      setCreditsFromServer(data.user.callCredits ?? 0)
+      setEntitlementsFromServer(!!data.user.unlimitedAccess, data.user.planDisplay ?? null)
       navigate('/dashboard')
     } catch (err: unknown) {
       const msg = err && typeof err === 'object' && 'response' in err
